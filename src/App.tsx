@@ -1,14 +1,11 @@
+import './App.css'
 import { Stage, Layer, Transformer, Rect } from "react-konva";
-import { useState } from "react";
 import useModeHandlers from "./hooks/useModeHandlers";
 import { useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 
-type Mode = "RECT" | "SELECT";
-
 const App = () => {
-  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
   const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
     useShapeRefState();
@@ -17,9 +14,11 @@ const App = () => {
     handleMouseMove,
     handleMouseUp,
     handleStageClick,
+    handleDragEnd,
+    handleTransformEnd,
     creatingRect,
     selectionRectangle,
-  } = useModeHandlers(mode);
+  } = useModeHandlers();
 
   return (
     <Stage
@@ -45,6 +44,8 @@ const App = () => {
             stroke={
               selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
             }
+            onDragEnd={handleDragEnd}
+            onTransformEnd={handleTransformEnd}
           />
         ))}
 

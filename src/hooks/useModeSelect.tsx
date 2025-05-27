@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
-import { useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { rectangleAtom } from "../Atoms/RectangleState";
 
 interface ElementProps {
@@ -71,7 +71,7 @@ export default function useModeSelect() {
     useShapeRefState();
   const [selectionRectangle, setSelectionRectangle] =
     useState<SelectRectangleProps>(initSelectionRectangleData);
-  const rectangles = useAtomValue(rectangleAtom);
+  const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const isSelecting = useRef(false);
 
   useEffect(() => {
@@ -86,14 +86,58 @@ export default function useModeSelect() {
     }
   }, [selectedIds]);
 
+  const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
+    const id = e.target.id();
+    setRectangles((prevRects) => {
+      const newRects = [...prevRects];
+      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
+      if (index !== -1) {
+        newRects[index] = {
+          ...newRects[index],
+          x: e.target.x(),
+          y: e.target.y(),
+        };
+      }
+      return newRects;
+    });
+  };
+
+  const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
+    const id = e.target.id();
+    const node = e.target;
+
+    setRectangles((prevRects) => {
+      const newRects = [...prevRects];
+
+      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
+
+      if (index !== -1) {
+        const scaleX = node.scaleX();
+        const scaleY = node.scaleY();
+
+        node.scaleX(1);
+        node.scaleY(1);
+
+        newRects[index] = {
+          ...newRects[index],
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(5, node.width() * scaleX),
+          height: Math.max(node.height() * scaleY),
+          rotation: node.rotation(),
+        };
+      }
+
+      return newRects;
+    });
+  };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-
     if (e.target === e.target.getStage()) {
       setSelectedIds([]);
       return;
     }
-    if (!e.target.hasName('Rectangle')) {
+    if (!e.target.hasName("Rectangle")) {
       return;
     }
 
@@ -105,7 +149,7 @@ export default function useModeSelect() {
     if (!metaPressed && !isSelected) {
       setSelectedIds([clickedId]);
     } else if (metaPressed && isSelected) {
-      setSelectedIds(selectedIds.filter(id => id !== clickedId));
+      setSelectedIds(selectedIds.filter((id) => id !== clickedId));
     } else if (metaPressed && !isSelected) {
       setSelectedIds([...selectedIds, clickedId]);
     }
@@ -142,7 +186,7 @@ export default function useModeSelect() {
       x2: pos.x,
       y2: pos.y,
     });
-    
+
     const selBox = {
       x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
       y: Math.min(selectionRectangle.y1, selectionRectangle.y2),
@@ -176,6 +220,8 @@ export default function useModeSelect() {
     handleMouseMove,
     handleMouseUp,
     handleStageClick,
+    handleDragEnd,
+    handleTransformEnd,
     selectionRectangle,
   };
 }

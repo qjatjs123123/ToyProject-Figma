@@ -17,6 +17,8 @@ export interface HandlerProps {
   handleMouseMove?: (e: KonvaEventObject<MouseEvent>) => void;
   handleMouseUp?: (e: KonvaEventObject<MouseEvent>) => void;
   handleStageClick?: (e: KonvaEventObject<MouseEvent>) => void;
+  handleDragEnd? : (e: KonvaEventObject<MouseEvent>) => void;
+  handleTransformEnd? : (e: KonvaEventObject<MouseEvent>) => void;
   creatingRect?: RectType | null;
   selectionRectangle?: SelectRectangleProps | null
 }

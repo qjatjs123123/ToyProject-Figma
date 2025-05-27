@@ -1,17 +1,13 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import type { HandlerProps } from "../type/Shape";
 import useModeRect from "./useModeRect";
 import useModeSelect from "./useModeSelect";
+import { useShapeRefState } from "../contexts/ShapeRefContext";
+import type { HandlerProps } from "../type/Shape";
 
-type Mode = "RECT" | "SELECT";
+export default function useModeHandlers(): HandlerProps {
+  const { mode } = useShapeRefState();
 
-export default function useModeHandlers(mode: Mode): HandlerProps {
-  switch (mode) {
-    case "RECT":
-      return useModeRect();
-    case "SELECT":
-      return useModeSelect();
-    default:
-      throw new Error(`Unknown mode: ${mode}`);
-  }
+  const rectHandlers = useModeRect();
+  const selectHandlers = useModeSelect();
+
+  return mode === "RECT" ? rectHandlers : selectHandlers;
 }

@@ -4,6 +4,8 @@ import type { RectType } from "../type/Shape";
 import { rectangleAtom } from "../Atoms/RectangleState";
 import { useAtom, useAtomValue } from "jotai";
 import { rectangleMaxID } from "../Atoms/RectangleState";
+import { useShapeRefState } from "../contexts/ShapeRefContext";
+import { Rect } from "konva/lib/shapes/Rect";
 
 interface PointProps {
   x: number;
@@ -12,15 +14,25 @@ interface PointProps {
 
 export default function useModeRect() {
   const [creatingRect, setCreatingRect] = useState<RectType | null>(null);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const maxID = useAtomValue(rectangleMaxID);
   const isCreating = useRef(false);
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
+  const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
 
   useEffect(() => {
-    console.log(rectangles);
-  }, [rectangles]);
+    if (selectedIds.length && transformerRef.current) {
+      const nodes = selectedIds
+        .map(id => rectRefs.current.get(id))
+        .filter(node => node instanceof Rect);
+      
+      if (nodes.length > 0)   
+        transformerRef.current.nodes(nodes);
+      
+      if (nodes.length == 0 && drawingShapeRef.current)
+        transformerRef.current.nodes([drawingShapeRef.current])
+    }
+  }, [selectedIds, creatingRect]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) return;
@@ -59,8 +71,9 @@ export default function useModeRect() {
   };
 
   const handleMouseUp = () => {
-    if (!isCreating.current || !startPoint.current ) return;
-    if (!creatingRect || creatingRect.width <= 5 || creatingRect.height <= 5) return;
+    if (!isCreating.current || !startPoint.current) return;
+    if (!creatingRect || creatingRect.width <= 5 || creatingRect.height <= 5)
+      return;
 
     setRectangles([...rectangles, creatingRect]);
     setCreatingRect(null);
@@ -71,5 +84,8 @@ export default function useModeRect() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    transformerRef,
+    rectRefs,
+    creatingRect
   };
 }

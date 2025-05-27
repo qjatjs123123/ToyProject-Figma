@@ -1,16 +1,17 @@
 import { Stage, Layer, Transformer, Rect } from "react-konva";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import useModeHandlers from "./hooks/useModeHandlers";
 import { useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
+import { useShapeRefState } from "./contexts/ShapeRefContext";
 
 type Mode = "RECT" | "LINE";
 
 const App = () => {
   const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
-  const { handleMouseDown, handleMouseMove, handleMouseUp } = useModeHandlers(mode);
-  const transformerRef = useRef(null);
+  const { rectRefs, transformerRef, drawingShapeRef } = useShapeRefState();
+  const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect } = useModeHandlers(mode);
 
   return (
     <Stage
@@ -21,14 +22,30 @@ const App = () => {
       onMouseUp={handleMouseUp}
     >
       <Layer>
+
         {rectangles.map((rect) => (
           <Rect
-            key={`${rect.name} ${rect.id}`}
             {...rect}
+            key={`${rect.name} ${rect.id}`}
             id={`${rect.name} ${rect.id}`}
             draggable
+            ref={(node) => {
+              if (node) {
+                rectRefs.current.set(`${rect.name} ${rect.id}`, node);
+              }
+            }}
           />
         ))}
+
+        {creatingRect && (
+          <Rect
+            {...creatingRect}
+            ref={drawingShapeRef}
+            name="rect"
+            id="creating"
+            draggable={false}
+          />
+        )}
 
         <Transformer
           ref={transformerRef}

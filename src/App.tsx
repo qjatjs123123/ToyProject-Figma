@@ -18,6 +18,7 @@ const App = () => {
     handleMouseUp,
     handleStageClick,
     handleDragEnd,
+    handleTransformEnd,
     creatingRect,
     selectionRectangle,
   } = useModeHandlers(mode);
@@ -47,6 +48,7 @@ const App = () => {
               selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
             }
             onDragEnd={handleDragEnd}
+            onTransformEnd={handleTransformEnd}
           />
         ))}
 

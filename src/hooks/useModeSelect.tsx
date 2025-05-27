@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { rectangleAtom } from "../Atoms/RectangleState";
 
 interface ElementProps {
@@ -87,7 +87,7 @@ export default function useModeSelect() {
   }, [selectedIds]);
 
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
-    const id = e.target.id()
+    const id = e.target.id();
     setRectangles((prevRects) => {
       const newRects = [...prevRects];
       const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
@@ -98,6 +98,36 @@ export default function useModeSelect() {
           y: e.target.y(),
         };
       }
+      return newRects;
+    });
+  };
+
+  const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
+    const id = e.target.id();
+    const node = e.target;
+
+    setRectangles((prevRects) => {
+      const newRects = [...prevRects];
+
+      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
+
+      if (index !== -1) {
+        const scaleX = node.scaleX();
+        const scaleY = node.scaleY();
+
+        node.scaleX(1);
+        node.scaleY(1);
+
+        newRects[index] = {
+          ...newRects[index],
+          x: node.x(),
+          y: node.y(),
+          width: Math.max(5, node.width() * scaleX),
+          height: Math.max(node.height() * scaleY),
+          rotation: node.rotation(),
+        };
+      }
+
       return newRects;
     });
   };
@@ -191,6 +221,7 @@ export default function useModeSelect() {
     handleMouseUp,
     handleStageClick,
     handleDragEnd,
+    handleTransformEnd,
     selectionRectangle,
   };
 }

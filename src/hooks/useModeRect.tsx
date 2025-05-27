@@ -4,25 +4,25 @@ import type { RectType } from "../type/Shape";
 
 let rectID = 1;
 interface PointProps {
-  x: number,
-  y: number
+  x: number;
+  y: number;
 }
 
 export default function useModeRect() {
-  const [creatingRect, setCreatingRect] = useState<RectType>();
+  const [creatingRect, setCreatingRect] = useState<RectType | null>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const isCreating = useRef(false);
-  const startPoint = useRef<PointProps | null>(null);
+  const startPoint = useRef<PointProps>({ x: 0, y: 0 });
 
   useEffect(() => {
     console.log(creatingRect);
-  }, [creatingRect])
+  }, [creatingRect]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) return;
 
     const pos = e.target.getStage().getPointerPosition();
-    if(!pos) return;
+    if (!pos) return;
 
     isCreating.current = true;
     startPoint.current = pos;
@@ -41,9 +41,7 @@ export default function useModeRect() {
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isCreating.current || !startPoint.current || !creatingRect) {
-      return;
-    }
+    if (isNotValidEvent()) return;
 
     const pos = e.target.getStage()?.getPointerPosition() as RectType;
 
@@ -56,8 +54,20 @@ export default function useModeRect() {
     });
   };
 
+  const handleMouseUp = () => {
+    if (isNotValidEvent()) return;
+
+    setCreatingRect(null);
+    isCreating.current = false;
+    console.log("up");
+  };
+
+  const isNotValidEvent = () =>
+    !isCreating.current || !startPoint.current || !creatingRect;
+
   return {
     handleMouseDown,
-    handleMouseMove
+    handleMouseMove,
+    handleMouseUp,
   };
 }

@@ -6,7 +6,7 @@ type Mode = "RECT" | "LINE";
 
 const App = () => {
   const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
-  const { handleMouseDown, handleMouseMove } = useModeHandlers(mode);
+  const { handleMouseDown, handleMouseMove, handleMouseUp } = useModeHandlers(mode);
   const transformerRef = useRef(null);
 
   return (
@@ -15,6 +15,7 @@ const App = () => {
       height={window.innerHeight}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
       <Layer>
         <Transformer

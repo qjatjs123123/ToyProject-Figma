@@ -10,7 +10,7 @@ type Mode = "RECT" | "SELECT";
 const App = () => {
   const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
-  const { rectRefs, transformerRef, drawingShapeRef } = useShapeRefState();
+  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } = useShapeRefState();
   const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect, selectionRectangle } = useModeHandlers(mode);
 
   return (
@@ -34,6 +34,7 @@ const App = () => {
                 rectRefs.current.set(`${rect.name} ${rect.id}`, node);
               }
             }}
+            stroke={selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""}
           />
         ))}
 

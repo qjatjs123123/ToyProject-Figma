@@ -50,7 +50,9 @@ export default function useModeRect() {
       height: 0,
       id: maxID,
       name: "Rectangle",
+      type: "shape",
       fill: "#D9D9D9",
+      rotation: 0,
     });
 
     setSelectedIds([`Rectangle ${maxID}`]);

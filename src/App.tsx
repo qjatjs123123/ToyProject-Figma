@@ -5,13 +5,21 @@ import { useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 
-type Mode = "RECT" | "LINE";
+type Mode = "RECT" | "SELECT";
 
 const App = () => {
-  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
-  const { rectRefs, transformerRef, drawingShapeRef } = useShapeRefState();
-  const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect } = useModeHandlers(mode);
+  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
+    useShapeRefState();
+  const {
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleStageClick,
+    creatingRect,
+    selectionRectangle,
+  } = useModeHandlers(mode);
 
   return (
     <Stage
@@ -20,9 +28,9 @@ const App = () => {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onClick={handleStageClick}
     >
       <Layer>
-
         {rectangles.map((rect) => (
           <Rect
             {...rect}
@@ -34,6 +42,9 @@ const App = () => {
                 rectRefs.current.set(`${rect.name} ${rect.id}`, node);
               }
             }}
+            stroke={
+              selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
+            }
           />
         ))}
 
@@ -44,6 +55,17 @@ const App = () => {
             name="rect"
             id="creating"
             draggable={false}
+          />
+        )}
+
+        {selectionRectangle && selectionRectangle.visible && (
+          <Rect
+            x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
+            y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}
+            width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
+            height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
+            fill="rgba(40, 108, 255, 0.36)"
+            stroke="#80D0FF"
           />
         )}
 

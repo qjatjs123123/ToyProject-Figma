@@ -78,11 +78,27 @@ export default function useModeSelect() {
       x2: pos.x,
       y2: pos.y,
     });
+  };
 
-    console.log(pos);
+  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
+    if (!isSelecting.current) {
+      return;
+    }
+    
+    const pos = e.target.getStage()?.getPointerPosition();
+    if (!pos) return;
+
+    setSelectionRectangle({
+      ...selectionRectangle,
+      x2: pos.x,
+      y2: pos.y,
+    });
+
+    console.log(pos)
   };
 
   return {
     handleMouseDown,
+    handleMouseMove
   }
 }

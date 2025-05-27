@@ -18,7 +18,7 @@ export default function useModeRect() {
   const maxID = useAtomValue(rectangleMaxID);
   const isCreating = useRef(false);
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
-  const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
+  const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds, setMode } = useShapeRefState();
 
   useEffect(() => {
     if (selectedIds.length && transformerRef.current) {
@@ -80,6 +80,7 @@ export default function useModeRect() {
     setRectangles([...rectangles, creatingRect]);
     setCreatingRect(null);
     isCreating.current = false;
+    setMode('SELECT')
   };
 
   return {

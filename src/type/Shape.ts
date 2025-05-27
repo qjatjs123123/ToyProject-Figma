@@ -34,6 +34,7 @@ export interface HandlerProps {
   handleDragEnd? : (e: KonvaEventObject<MouseEvent>) => void;
   handleTransformEnd? : (e: KonvaEventObject<MouseEvent>) => void;
   creatingRect?: RectType | null;
+  creatingEllipse? : EllipseType | null;
   selectionRectangle?: SelectRectangleProps | null
 }
 

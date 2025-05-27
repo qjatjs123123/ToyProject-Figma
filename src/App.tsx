@@ -1,12 +1,14 @@
-import './App.css'
-import { Stage, Layer, Transformer, Rect } from "react-konva";
+import "./App.css";
+import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
 import useModeHandlers from "./hooks/useModeHandlers";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
+import { EllipseAtom } from "./Atoms/EllipseState";
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
+  const ellipses = useAtomValue(EllipseAtom);
   const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
     useShapeRefState();
   const {
@@ -17,6 +19,7 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
     creatingRect,
+    creatingEllipse,
     selectionRectangle,
   } = useModeHandlers();
 
@@ -59,6 +62,29 @@ const App = () => {
           />
         )}
 
+        {ellipses.map((ellipse) => (
+          <Ellipse
+            key={`${ellipse.name} ${ellipse.id}`}
+            x={ellipse.x}
+            y={ellipse.y}
+            radiusX={ellipse.radiusX}
+            radiusY={ellipse.radiusY}
+            fill={ellipse.fill}
+            stroke={ellipse.stroke}
+            strokeWidth={ellipse.strokeWidth}
+          />
+        ))}
+
+        {creatingEllipse && (
+          <Ellipse
+            {...creatingEllipse}
+            ref={drawingShapeRef}
+            name="ellipse"
+            id="creating"
+            draggable={false}
+          />
+        )}
+
         {selectionRectangle && selectionRectangle.visible && (
           <Rect
             x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
@@ -72,7 +98,6 @@ const App = () => {
 
         <Transformer
           ref={transformerRef}
-          
           boundBoxFunc={(oldBox, newBox) => {
             if (newBox.width < 5 || newBox.height < 5) {
               return oldBox;

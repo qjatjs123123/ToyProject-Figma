@@ -6,7 +6,7 @@ export const EllipseAtom = atomWithStorage<EllipseType[]>("EllipseState", []);
 
 
 // 공통 로직
-export const EllipseMaxID = atom((get) => {
+export const EllipseMaxID = atom<number>((get) => {
   const ellipse = get(EllipseAtom);
 
   const maxID = ellipse.reduce((max, rect) => {

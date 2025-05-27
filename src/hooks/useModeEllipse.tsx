@@ -2,8 +2,8 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { useEffect, useRef, useState } from "react";
 import type { EllipseType } from "../type/Shape";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
-import { useAtom } from "jotai";
-import { EllipseAtom } from "../Atoms/EllipseState";
+import { useAtom, useAtomValue } from "jotai";
+import { EllipseAtom, EllipseMaxID } from "../Atoms/EllipseState";
 
 interface PointProps {
   x: number;
@@ -15,6 +15,7 @@ export default function useModeEllipse() {
     null
   ); // 공통 로직
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  const maxID = useAtomValue(EllipseMaxID); // 공통통
   const isCreating = useRef(false); // 공통로직직
   const startPoint = useRef<PointProps>({ x: 0, y: 0 }); // 공통 로직
   const {
@@ -45,7 +46,7 @@ export default function useModeEllipse() {
       y: pos.y,
       radiusX: 0,
       radiusY: 0,
-      id: 1,
+      id: maxID,
       name: "Ellipse",
       type: "shape",
       fill: "#D9D9D9",
@@ -55,7 +56,7 @@ export default function useModeEllipse() {
     });
 
     // 모드 따라 다르게,
-    setSelectedIds([`Ellipse ${1}`]);
+    setSelectedIds([`Ellipse ${maxID}`]);
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
@@ -63,13 +64,14 @@ export default function useModeEllipse() {
 
     const pos = e.target.getStage()?.getPointerPosition() as EllipseType;
 
+
     //여기만 다르게
     setCreatingEllipse({
       ...creatingEllipse,
-      x: Math.min(startPoint.current.x, pos.x),
-      y: Math.min(startPoint.current.y, pos.y),
-      radiusX: Math.abs(pos.x - startPoint.current.x),
-      radiusY: Math.abs(pos.y - startPoint.current.y),
+      x: (startPoint.current.x + pos.x) / 2,
+      y: (startPoint.current.y + pos.y) / 2,
+      radiusX: Math.abs(pos.x - startPoint.current.x) / 2,
+      radiusY: Math.abs(pos.y - startPoint.current.y) / 2,
     });
   };
 
@@ -77,8 +79,13 @@ export default function useModeEllipse() {
     if (!isCreating.current || !startPoint.current) return;
 
     // 여기도 다름
-    if (!creatingEllipse || creatingEllipse.radiusX <= 5 || creatingEllipse.radiusY <= 5)
+    if (
+      !creatingEllipse ||
+      creatingEllipse.radiusX <= 5 ||
+      creatingEllipse.radiusY <= 5
+    )
       return;
+
 
     setEllipses([...ellipses, creatingEllipse]);
     setCreatingEllipse(null);
@@ -90,5 +97,6 @@ export default function useModeEllipse() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    creatingEllipse,
   };
 }

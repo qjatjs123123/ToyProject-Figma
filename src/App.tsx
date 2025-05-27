@@ -1,3 +1,4 @@
+import './App.css'
 import { Stage, Layer, Transformer, Rect } from "react-konva";
 import useModeHandlers from "./hooks/useModeHandlers";
 import { useAtomValue } from "jotai";

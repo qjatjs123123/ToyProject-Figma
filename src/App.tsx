@@ -10,8 +10,16 @@ type Mode = "RECT" | "SELECT";
 const App = () => {
   const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
-  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } = useShapeRefState();
-  const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect, selectionRectangle } = useModeHandlers(mode);
+  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
+    useShapeRefState();
+  const {
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleStageClick,
+    creatingRect,
+    selectionRectangle,
+  } = useModeHandlers(mode);
 
   return (
     <Stage
@@ -20,9 +28,9 @@ const App = () => {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onClick={handleStageClick}
     >
       <Layer>
-
         {rectangles.map((rect) => (
           <Rect
             {...rect}
@@ -34,7 +42,9 @@ const App = () => {
                 rectRefs.current.set(`${rect.name} ${rect.id}`, node);
               }
             }}
-            stroke={selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""}
+            stroke={
+              selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
+            }
           />
         ))}
 
@@ -48,7 +58,7 @@ const App = () => {
           />
         )}
 
-        { (selectionRectangle && selectionRectangle.visible) && (
+        {selectionRectangle && selectionRectangle.visible && (
           <Rect
             x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
             y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}

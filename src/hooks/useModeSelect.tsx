@@ -86,6 +86,31 @@ export default function useModeSelect() {
     }
   }, [selectedIds]);
 
+
+  const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
+
+    if (e.target === e.target.getStage()) {
+      setSelectedIds([]);
+      return;
+    }
+    if (!e.target.hasName('Rectangle')) {
+      return;
+    }
+
+    const clickedId = e.target.id();
+
+    const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey;
+    const isSelected = selectedIds.includes(clickedId);
+
+    if (!metaPressed && !isSelected) {
+      setSelectedIds([clickedId]);
+    } else if (metaPressed && isSelected) {
+      setSelectedIds(selectedIds.filter(id => id !== clickedId));
+    } else if (metaPressed && !isSelected) {
+      setSelectedIds([...selectedIds, clickedId]);
+    }
+  };
+
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) {
       return;
@@ -150,6 +175,7 @@ export default function useModeSelect() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    handleStageClick,
     selectionRectangle,
   };
 }

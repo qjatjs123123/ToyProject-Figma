@@ -9,12 +9,14 @@ export interface RectType {
   height: number;
   fill?: string;
   rotation: number; 
+  type: string;
 }
 
 export interface HandlerProps {
-  handleMouseDown: (e: KonvaEventObject<MouseEvent>) => void
+  handleMouseDown?: (e: KonvaEventObject<MouseEvent>) => void
   handleMouseMove?: (e: KonvaEventObject<MouseEvent>) => void;
   handleMouseUp?: (e: KonvaEventObject<MouseEvent>) => void;
+  handleStageClick?: (e: KonvaEventObject<MouseEvent>) => void;
   creatingRect?: RectType | null;
   selectionRectangle?: SelectRectangleProps | null
 }

@@ -7,6 +7,7 @@ type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
+  ellipseRefs: RefObject<Map<string, Rect>>;
   transformerRef: React.RefObject<Konva.Transformer | null>;
   drawingShapeRef: RefObject<Rect | null>;
   selectedIds: string[];
@@ -23,6 +24,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const rectRefs = useRef(new Map());
+  const ellipseRefs = useRef(new Map());
   const transformerRef = useRef(null);
   const drawingShapeRef = useRef(null);
 
@@ -33,6 +35,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         transformerRef,
         selectedIds,
         drawingShapeRef,
+        ellipseRefs,
         setSelectedIds,
         setMode,
         mode

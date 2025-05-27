@@ -4,6 +4,7 @@ import type { EllipseType } from "../type/Shape";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
 import { useAtom, useAtomValue } from "jotai";
 import { EllipseAtom, EllipseMaxID } from "../Atoms/EllipseState";
+import { Ellipse } from "konva/lib/shapes/Ellipse";
 
 interface PointProps {
   x: number;
@@ -20,7 +21,7 @@ export default function useModeEllipse() {
   const startPoint = useRef<PointProps>({ x: 0, y: 0 }); // 공통 로직
   const {
     drawingShapeRef,
-    rectRefs,
+    ellipseRefs,
     transformerRef,
     selectedIds,
     setSelectedIds,
@@ -28,8 +29,17 @@ export default function useModeEllipse() {
   } = useShapeRefState();
 
   useEffect(() => {
-    console.log(creatingEllipse);
-  }, [creatingEllipse]);
+    if (selectedIds.length && transformerRef.current) {
+      const nodes = selectedIds
+        .map((id) => ellipseRefs.current.get(id))
+        .filter((node) => node instanceof Ellipse);
+
+      if (nodes.length > 0) transformerRef.current.nodes(nodes);
+
+      if (nodes.length == 0 && drawingShapeRef.current)
+        transformerRef.current.nodes([drawingShapeRef.current]);
+    }
+  }, [selectedIds, creatingEllipse]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) return;
@@ -64,7 +74,6 @@ export default function useModeEllipse() {
 
     const pos = e.target.getStage()?.getPointerPosition() as EllipseType;
 
-
     //여기만 다르게
     setCreatingEllipse({
       ...creatingEllipse,
@@ -85,7 +94,6 @@ export default function useModeEllipse() {
       creatingEllipse.radiusY <= 5
     )
       return;
-
 
     setEllipses([...ellipses, creatingEllipse]);
     setCreatingEllipse(null);

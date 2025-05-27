@@ -17,6 +17,7 @@ const App = () => {
     handleMouseMove,
     handleMouseUp,
     handleStageClick,
+    handleDragEnd,
     creatingRect,
     selectionRectangle,
   } = useModeHandlers(mode);
@@ -45,6 +46,7 @@ const App = () => {
             stroke={
               selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
             }
+            onDragEnd={handleDragEnd}
           />
         ))}
 

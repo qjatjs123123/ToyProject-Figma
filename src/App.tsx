@@ -72,6 +72,7 @@ const App = () => {
 
         <Transformer
           ref={transformerRef}
+          
           boundBoxFunc={(oldBox, newBox) => {
             if (newBox.width < 5 || newBox.height < 5) {
               return oldBox;

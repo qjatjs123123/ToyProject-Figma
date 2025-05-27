@@ -3,7 +3,7 @@ import type { Rect } from "konva/lib/shapes/Rect";
 import { createContext, useContext, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 
-type Mode = "RECT" | "SELECT";
+type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
@@ -20,7 +20,7 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const rectRefs = useRef(new Map());
   const transformerRef = useRef(null);

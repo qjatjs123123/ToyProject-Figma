@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import type { HandlerProps } from "../type/Shape";
 import useModeRect from "./useModeRect";
 import useModeSelect from "./useModeSelect";
 
 type Mode = "RECT" | "SELECT";
 
-export default function useModeHandlers(mode: Mode) {
-  // 공통 로직
-
+export default function useModeHandlers(mode: Mode): HandlerProps {
   switch (mode) {
     case "RECT":
       return useModeRect();

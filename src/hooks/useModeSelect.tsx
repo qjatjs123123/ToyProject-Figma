@@ -61,13 +61,21 @@ const initSelectionRectangleData : SelectRectangleProps = {
   y2: 0,
 }
 export default function useModeSelect() {
-  const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
+  const { rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
   const [selectionRectangle, setSelectionRectangle] = useState<SelectRectangleProps>(initSelectionRectangleData);
   const rectangles = useAtomValue(rectangleAtom);
   const isSelecting = useRef(false);
 
   useEffect(() => {
-    console.log(selectedIds);
+    if (selectedIds.length && transformerRef.current) {
+      const nodes = selectedIds
+        .map(id => rectRefs.current.get(id))
+        .filter(node => node != undefined);
+      
+      transformerRef.current.nodes(nodes);
+    } else if (transformerRef.current) {
+      transformerRef.current.nodes([]);
+    }
   }, [selectedIds])
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
@@ -134,6 +142,7 @@ export default function useModeSelect() {
   return {
     handleMouseDown,
     handleMouseMove,
-    handleMouseUp
+    handleMouseUp,
+    selectionRectangle
   }
 }

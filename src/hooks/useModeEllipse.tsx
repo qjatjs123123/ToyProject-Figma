@@ -2,6 +2,8 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { useEffect, useRef, useState } from "react";
 import type { EllipseType } from "../type/Shape";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
+import { useAtom } from "jotai";
+import { EllipseAtom } from "../Atoms/EllipseState";
 
 interface PointProps {
   x: number;
@@ -12,6 +14,7 @@ export default function useModeEllipse() {
   const [creatingEllipse, setCreatingEllipse] = useState<EllipseType | null>(
     null
   ); // 공통 로직
+  const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const isCreating = useRef(false); // 공통로직직
   const startPoint = useRef<PointProps>({ x: 0, y: 0 }); // 공통 로직
   const {
@@ -77,7 +80,7 @@ export default function useModeEllipse() {
     if (!creatingEllipse || creatingEllipse.radiusX <= 5 || creatingEllipse.radiusY <= 5)
       return;
 
-    // setRectangles([...rectangles, creatingRect]);
+    setEllipses([...ellipses, creatingEllipse]);
     setCreatingEllipse(null);
     isCreating.current = false;
     // setMode("SELECT");

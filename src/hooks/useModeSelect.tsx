@@ -1,6 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useShapeRefState } from "../contexts/ShapeRefContext";
 import type { KonvaEventObject } from "konva/lib/Node";
+import Konva from "konva";
+import { useAtomValue } from "jotai";
+import { rectangleAtom } from "../Atoms/RectangleState";
 
 interface ElementProps {
   x : number,
@@ -60,7 +63,12 @@ const initSelectionRectangleData : SelectRectangleProps = {
 export default function useModeSelect() {
   const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
   const [selectionRectangle, setSelectionRectangle] = useState<SelectRectangleProps>(initSelectionRectangleData);
+  const rectangles = useAtomValue(rectangleAtom);
   const isSelecting = useRef(false);
+
+  useEffect(() => {
+    console.log(selectedIds);
+  }, [selectedIds])
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) {
@@ -94,11 +102,38 @@ export default function useModeSelect() {
       y2: pos.y,
     });
 
-    console.log(pos)
+  };
+
+  const handleMouseUp = () => {
+    if (!isSelecting.current) {
+      return;
+    }
+    isSelecting.current = false;
+    
+    setTimeout(() => {
+      setSelectionRectangle({
+        ...selectionRectangle,
+        visible: false,
+      });
+    });
+
+    const selBox = {
+      x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
+      y: Math.min(selectionRectangle.y1, selectionRectangle.y2),
+      width: Math.abs(selectionRectangle.x2 - selectionRectangle.x1),
+      height: Math.abs(selectionRectangle.y2 - selectionRectangle.y1),
+    };
+
+    const selected = rectangles.filter(rect => {
+      return Konva.Util.haveIntersection(selBox, getClientRect(rect));
+    });
+    
+    setSelectedIds(selected.map(rect => `${rect.name} ${rect.id}`));
   };
 
   return {
     handleMouseDown,
-    handleMouseMove
+    handleMouseMove,
+    handleMouseUp
   }
 }

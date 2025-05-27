@@ -6,4 +6,5 @@ export interface RectType {
   width: number;
   height: number;
   fill?: string;
+  rotation: number;
 }

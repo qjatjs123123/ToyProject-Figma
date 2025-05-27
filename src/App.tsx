@@ -1,35 +1,34 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Stage, Layer, Rect, Transformer } from "react-konva";
+import { useRef, useState } from "react";
+import useModeHandlers from "./hooks/useModeHandlers";
+import type { KonvaEventObject } from "konva/lib/Node";
 
-function App() {
-  const [count, setCount] = useState(0)
+type Mode = "RECT" | "LINE";
+
+const App = () => {
+  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const { handleMouseDown } = useModeHandlers(mode);
+  const transformerRef = useRef(null);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Stage
+      width={window.innerWidth}
+      height={window.innerHeight}
+      onMouseDown={handleMouseDown}
+    >
+      <Layer>
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => {
+            if (newBox.width < 5 || newBox.height < 5) {
+              return oldBox;
+            }
+            return newBox;
+          }}
+        />
+      </Layer>
+    </Stage>
+  );
+};
 
-export default App
+export default App;

@@ -1,6 +1,8 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useEffect, useRef, useState } from "react";
 import type { RectType } from "../type/Shape";
+import { rectangleAtom } from "../Atoms/RectangleState";
+import { useAtom } from "jotai";
 
 let rectID = 1;
 interface PointProps {
@@ -9,14 +11,15 @@ interface PointProps {
 }
 
 export default function useModeRect() {
-  const [creatingRect, setCreatingRect] = useState<RectType | null>();
+  const [creatingRect, setCreatingRect] = useState<RectType | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const isCreating = useRef(false);
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
 
   useEffect(() => {
-    console.log(creatingRect);
-  }, [creatingRect]);
+    console.log(rectangles);
+  }, [rectangles]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) return;
@@ -56,10 +59,11 @@ export default function useModeRect() {
 
   const handleMouseUp = () => {
     if (isNotValidEvent()) return;
+    if (!creatingRect || creatingRect.width <= 5 || creatingRect.height <= 5) return;
 
+    setRectangles([...rectangles, creatingRect]);
     setCreatingRect(null);
     isCreating.current = false;
-    console.log("up");
   };
 
   const isNotValidEvent = () =>

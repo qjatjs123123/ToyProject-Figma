@@ -8,7 +8,7 @@ import { useShapeRefState } from "./contexts/ShapeRefContext";
 type Mode = "RECT" | "LINE";
 
 const App = () => {
-  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const rectangles = useAtomValue(rectangleAtom);
   const { rectRefs, transformerRef, drawingShapeRef } = useShapeRefState();
   const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect } = useModeHandlers(mode);

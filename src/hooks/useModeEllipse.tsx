@@ -60,6 +60,7 @@ export default function useModeEllipse() {
 
     const pos = e.target.getStage()?.getPointerPosition() as EllipseType;
 
+    //여기만 다르게
     setCreatingEllipse({
       ...creatingEllipse,
       x: Math.min(startPoint.current.x, pos.x),
@@ -67,12 +68,24 @@ export default function useModeEllipse() {
       radiusX: Math.abs(pos.x - startPoint.current.x),
       radiusY: Math.abs(pos.y - startPoint.current.y),
     });
-
   };
 
+  const handleMouseUp = () => {
+    if (!isCreating.current || !startPoint.current) return;
+
+    // 여기도 다름
+    if (!creatingEllipse || creatingEllipse.radiusX <= 5 || creatingEllipse.radiusY <= 5)
+      return;
+
+    // setRectangles([...rectangles, creatingRect]);
+    setCreatingEllipse(null);
+    isCreating.current = false;
+    // setMode("SELECT");
+  };
 
   return {
     handleMouseDown,
     handleMouseMove,
+    handleMouseUp,
   };
 }

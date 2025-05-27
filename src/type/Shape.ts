@@ -5,5 +5,5 @@ export interface RectType {
   y: number;
   width: number;
   height: number;
-  fill?: string;
+  fill: string;
 }

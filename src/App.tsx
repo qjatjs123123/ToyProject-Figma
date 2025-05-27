@@ -1,13 +1,12 @@
-import { Stage, Layer, Rect, Transformer } from "react-konva";
+import { Stage, Layer, Transformer } from "react-konva";
 import { useRef, useState } from "react";
 import useModeHandlers from "./hooks/useModeHandlers";
-import type { KonvaEventObject } from "konva/lib/Node";
 
 type Mode = "RECT" | "LINE";
 
 const App = () => {
   const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
-  const { handleMouseDown } = useModeHandlers(mode);
+  const { handleMouseDown, handleMouseMove } = useModeHandlers(mode);
   const transformerRef = useRef(null);
 
   return (
@@ -15,6 +14,7 @@ const App = () => {
       width={window.innerWidth}
       height={window.innerHeight}
       onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
     >
       <Layer>
         <Transformer

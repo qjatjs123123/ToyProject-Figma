@@ -1,35 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Stage, Layer, Transformer, Rect } from "react-konva";
+import { useState } from "react";
+import useModeHandlers from "./hooks/useModeHandlers";
+import { useAtomValue } from "jotai";
+import { rectangleAtom } from "./Atoms/RectangleState";
+import { useShapeRefState } from "./contexts/ShapeRefContext";
 
-function App() {
-  const [count, setCount] = useState(0)
+type Mode = "RECT" | "LINE";
+
+const App = () => {
+  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const rectangles = useAtomValue(rectangleAtom);
+  const { rectRefs, transformerRef, drawingShapeRef } = useShapeRefState();
+  const { handleMouseDown, handleMouseMove, handleMouseUp, creatingRect } = useModeHandlers(mode);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Stage
+      width={window.innerWidth}
+      height={window.innerHeight}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
+      <Layer>
 
-export default App
+        {rectangles.map((rect) => (
+          <Rect
+            {...rect}
+            key={`${rect.name} ${rect.id}`}
+            id={`${rect.name} ${rect.id}`}
+            draggable
+            ref={(node) => {
+              if (node) {
+                rectRefs.current.set(`${rect.name} ${rect.id}`, node);
+              }
+            }}
+          />
+        ))}
+
+        {creatingRect && (
+          <Rect
+            {...creatingRect}
+            ref={drawingShapeRef}
+            name="rect"
+            id="creating"
+            draggable={false}
+          />
+        )}
+
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => {
+            if (newBox.width < 5 || newBox.height < 5) {
+              return oldBox;
+            }
+            return newBox;
+          }}
+        />
+      </Layer>
+    </Stage>
+  );
+};
+
+export default App;

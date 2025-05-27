@@ -6,24 +6,30 @@ import { useAtomValue } from "jotai";
 import { rectangleAtom } from "../Atoms/RectangleState";
 
 interface ElementProps {
-  x : number,
-  y : number,
-  width : number,
-  height : number,
-  rotation: number
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
 }
 
-interface SelectRectangleProps { 
-  visible: boolean,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
+interface SelectRectangleProps {
+  visible: boolean;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
 }
 
-const degToRad = (angle : number) => (angle / 180) * Math.PI;
+const degToRad = (angle: number) => (angle / 180) * Math.PI;
 
-const getCorner = (pivotX : number, pivotY : number, diffX : number, diffY : number, angle : number) => {
+const getCorner = (
+  pivotX: number,
+  pivotY: number,
+  diffX: number,
+  diffY: number,
+  angle: number
+) => {
   const distance = Math.sqrt(diffX * diffX + diffY * diffY);
   angle += Math.atan2(diffY, diffX);
   const x = pivotX + distance * Math.cos(angle);
@@ -31,7 +37,7 @@ const getCorner = (pivotX : number, pivotY : number, diffX : number, diffY : num
   return { x, y };
 };
 
-const getClientRect = (element : ElementProps) => {
+const getClientRect = (element: ElementProps) => {
   const { x, y, width, height, rotation = 0 } = element;
   const rad = degToRad(rotation);
 
@@ -53,36 +59,38 @@ const getClientRect = (element : ElementProps) => {
   };
 };
 
-const initSelectionRectangleData : SelectRectangleProps = {
+const initSelectionRectangleData: SelectRectangleProps = {
   visible: false,
   x1: 0,
   y1: 0,
   x2: 0,
   y2: 0,
-}
+};
 export default function useModeSelect() {
-  const { rectRefs, transformerRef, selectedIds, setSelectedIds } = useShapeRefState();
-  const [selectionRectangle, setSelectionRectangle] = useState<SelectRectangleProps>(initSelectionRectangleData);
+  const { rectRefs, transformerRef, selectedIds, setSelectedIds } =
+    useShapeRefState();
+  const [selectionRectangle, setSelectionRectangle] =
+    useState<SelectRectangleProps>(initSelectionRectangleData);
   const rectangles = useAtomValue(rectangleAtom);
   const isSelecting = useRef(false);
 
   useEffect(() => {
     if (selectedIds.length && transformerRef.current) {
       const nodes = selectedIds
-        .map(id => rectRefs.current.get(id))
-        .filter(node => node != undefined);
-      
+        .map((id) => rectRefs.current.get(id))
+        .filter((node) => node != undefined);
+
       transformerRef.current.nodes(nodes);
     } else if (transformerRef.current) {
       transformerRef.current.nodes([]);
     }
-  }, [selectedIds])
+  }, [selectedIds]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) {
       return;
     }
-  
+
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
 
@@ -100,7 +108,7 @@ export default function useModeSelect() {
     if (!isSelecting.current) {
       return;
     }
-    
+
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
@@ -109,22 +117,7 @@ export default function useModeSelect() {
       x2: pos.x,
       y2: pos.y,
     });
-
-  };
-
-  const handleMouseUp = () => {
-    if (!isSelecting.current) {
-      return;
-    }
-    isSelecting.current = false;
     
-    setTimeout(() => {
-      setSelectionRectangle({
-        ...selectionRectangle,
-        visible: false,
-      });
-    });
-
     const selBox = {
       x: Math.min(selectionRectangle.x1, selectionRectangle.x2),
       y: Math.min(selectionRectangle.y1, selectionRectangle.y2),
@@ -132,17 +125,31 @@ export default function useModeSelect() {
       height: Math.abs(selectionRectangle.y2 - selectionRectangle.y1),
     };
 
-    const selected = rectangles.filter(rect => {
+    const selected = rectangles.filter((rect) => {
       return Konva.Util.haveIntersection(selBox, getClientRect(rect));
     });
-    
-    setSelectedIds(selected.map(rect => `${rect.name} ${rect.id}`));
+
+    setSelectedIds(selected.map((rect) => `${rect.name} ${rect.id}`));
+  };
+
+  const handleMouseUp = () => {
+    if (!isSelecting.current) {
+      return;
+    }
+    isSelecting.current = false;
+
+    setTimeout(() => {
+      setSelectionRectangle({
+        ...selectionRectangle,
+        visible: false,
+      });
+    });
   };
 
   return {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    selectionRectangle
-  }
+    selectionRectangle,
+  };
 }

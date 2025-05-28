@@ -1,4 +1,8 @@
-const EllipseIcon = ({ color }) => {
+interface EllipseIcon {
+  color: string;
+}
+
+const EllipseIcon = ({ color } : EllipseIcon) => {
   return (
     <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
       <path

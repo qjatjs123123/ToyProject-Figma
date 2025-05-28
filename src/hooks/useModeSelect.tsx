@@ -78,25 +78,25 @@ export default function useModeSelect() {
   const [ellipses, setEllipse] = useAtom(EllipseAtom)
   const isSelecting = useRef(false);
 
-  useEffect(() => {
-    if (selectedIds.length && transformerRef.current) {
-      const nodes = [];
+  // useEffect(() => {
+  //   if (selectedIds.length && transformerRef.current) {
+  //     const nodes = [];
 
-      selectedIds.forEach((id) => {
-        const type = id.split(" ")[0];
-        let data = null;
+  //     selectedIds.forEach((id) => {
+  //       const type = id.split(" ")[0];
+  //       let data = null;
 
-        if (type === "Rectangle") data = rectRefs.current.get(id);
-        else data = ellipseRefs.current.get(id);
+  //       if (type === "Rectangle") data = rectRefs.current.get(id);
+  //       else data = ellipseRefs.current.get(id);
 
-        if (data) nodes.push(data);
-      });
+  //       if (data) nodes.push(data);
+  //     });
       
-      transformerRef.current.nodes(nodes);
-    } else if (transformerRef.current) {
-      transformerRef.current.nodes([]);
-    }
-  }, [selectedIds]);
+  //     transformerRef.current.nodes(nodes);
+  //   } else if (transformerRef.current) {
+  //     transformerRef.current.nodes([]);
+  //   }
+  // }, [selectedIds]);
 
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
     const id = e.target.id();
@@ -171,6 +171,7 @@ export default function useModeSelect() {
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+  
     if (e.target !== e.target.getStage()) {
       return;
     }

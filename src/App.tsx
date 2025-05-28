@@ -5,12 +5,18 @@ import { useAtom, useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
+import { useEffect } from "react";
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
   const ellipses = useAtomValue(EllipseAtom);
-  const { ellipseRefs, rectRefs, transformerRef, drawingShapeRef, selectedIds } =
-    useShapeRefState();
+  const {
+    ellipseRefs,
+    rectRefs,
+    transformerRef,
+    drawingShapeRef,
+    selectedIds,
+  } = useShapeRefState();
   const {
     handleMouseDown,
     handleMouseMove,
@@ -73,7 +79,9 @@ const App = () => {
             radiusY={ellipse.radiusY}
             fill={ellipse.fill}
             stroke={
-              selectedIds.includes(`${ellipse.name} ${ellipse.id}`) ? "#80D0FF" : ""
+              selectedIds.includes(`${ellipse.name} ${ellipse.id}`)
+                ? "#80D0FF"
+                : ""
             }
             strokeWidth={ellipse.strokeWidth}
             ref={(node) => {

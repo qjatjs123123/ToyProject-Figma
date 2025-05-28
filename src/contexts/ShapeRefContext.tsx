@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode, RefObject } from "react";
+import { tempShapeReducer } from "./shapeReducer";
 
 type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
@@ -28,51 +29,41 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, {});
+  const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
-  const transformerRef = useRef(null);
+  const transformerRef= useRef<Konva.Transformer>(null);
   const drawingShapeRef = useRef(null);
 
   useEffect(() => {
     console.log(tempShape);
-  }, [tempShape])
-
-  function tempShapeReducer(old, action) {
-    switch (action.type) {
-      case "RECT":
-        return action.data;
-      default:
-        return {
-          visible: true,
-          x1: action.data.pos.x,
-          y1: action.data.pos.y,
-          x2: action.data.pos.x,
-          y2: action.data.pos.y,
-        };
-    }
-  }
+  }, [tempShape]);
 
   useEffect(() => {
-    if (selectedIds.length && transformerRef.current) {
-      const nodes = [];
+    const transformer = transformerRef.current;
+    if (!transformer) return;
 
-      selectedIds.forEach((id) => {
-        const type = id.split(" ")[0];
-        let data = null;
-
-        if (type === "Rectangle") data = rectRefs.current.get(id);
-        else data = ellipseRefs.current.get(id);
-
-        if (data) nodes.push(data);
-      });
-
-      transformerRef.current.nodes(nodes);
-    } else if (transformerRef.current) {
-      transformerRef.current.nodes([]);
+    if (selectedIds.length === 0) {
+      transformer.nodes([]);
+      return;
     }
+
+    const nodes = [] as Konva.Node[];
+
+    selectedIds.forEach((id) => {
+      const type = id.split(" ")[0];
+      let data = null;
+
+      if (type === "Rectangle") data = rectRefs.current.get(id);
+      else if(type === "Ellipse") data = ellipseRefs.current.get(id);
+
+      if (data) nodes.push(data);
+    });
+
+    transformerRef.current?.nodes(nodes);
+   
   }, [selectedIds]);
 
   return (

@@ -82,18 +82,18 @@ export default function useModeHandlers() {
   const shapeAll = useAtomValue(shapeAllData); 
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
-  const isDragging = useRef(true);
+  const isDragging = useRef(false);
   const setterFunc = {
     Rect: setRectangles,
     Ellipse: setEllipses,
   };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
+
     if (isDragging.current) {
       return;
     }
     
-
     if (e.target === e.target.getStage()) {
       setSelectedIds([]);
       return;
@@ -116,13 +116,11 @@ export default function useModeHandlers() {
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    if (e.target !== e.target.getStage() || isDragging.current) return;
+    if (e.target !== e.target.getStage()) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
-
     setIsCreating(true)
     startPoint.current = pos;
-
 
     tempShapeDispatch({
       type: mode,
@@ -153,7 +151,9 @@ export default function useModeHandlers() {
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
-    isDragging.current = true;
+
+    if (startPoint.current) isDragging.current = true;
+    
     tempShapeDispatch({
       type: mode,
       data: {
@@ -219,6 +219,7 @@ export default function useModeHandlers() {
   };
 
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
+    startPoint.current = null;
     if (!isCreating) {
       return;
     }
@@ -229,6 +230,7 @@ export default function useModeHandlers() {
     else if (mode === "ELLIPSE")
       setEllipses([...ellipses, tempShape as EllipseShape]);
 
+    
     setMode("SELECT");
     tempShapeDispatch({
         type: "INIT",
@@ -238,12 +240,12 @@ export default function useModeHandlers() {
   };
 
   const selectShapesByDrageInit = (e: KonvaEventObject<MouseEvent>) => {
-    if (mode !== "SELECT") return;
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
     setTimeout(() => {
+
       isDragging.current = false;
     }, 10);
   };

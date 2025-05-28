@@ -1,5 +1,7 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 
+export type Mode = "RECT" | "SELECT" | "ELLIPSE";
+
 export interface EllipseType {
   id: number;
   name : string;

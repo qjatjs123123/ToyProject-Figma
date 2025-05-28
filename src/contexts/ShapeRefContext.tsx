@@ -1,19 +1,36 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type Konva from "konva";
 import type { Rect } from "konva/lib/shapes/Rect";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode, RefObject } from "react";
+import {
+  tempShapeReducer,
+  type TempShape,
+  type TempShapeAction,
+} from "./shapeReducer";
 
 type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
   ellipseRefs: RefObject<Map<string, Rect>>;
+  tempShape: TempShape | null;
   transformerRef: React.RefObject<Konva.Transformer | null>;
   drawingShapeRef: RefObject<Rect | null>;
   selectedIds: string[];
   setSelectedIds: (ids: string[]) => void;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
-  mode: Mode
+  tempShapeDispatch: React.Dispatch<TempShapeAction>;
+  mode: Mode;
+  isCreating: any;
+  setIsCreating: any;
 }
 
 const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
@@ -23,30 +40,42 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
+  const [isCreating, setIsCreating] = useState(false);
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
-  const transformerRef = useRef(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
   const drawingShapeRef = useRef(null);
-  
+
   useEffect(() => {
-    if (selectedIds.length && transformerRef.current) {
-      const nodes = [];
+    const transformer = transformerRef.current;
 
-      selectedIds.forEach((id) => {
-        const type = id.split(" ")[0];
-        let data = null;
+    if (!transformer) return;
 
-        if (type === "Rectangle") data = rectRefs.current.get(id);
-        else data = ellipseRefs.current.get(id);
-
-        if (data) nodes.push(data);
-      });
-      
-      transformerRef.current.nodes(nodes);
-    } else if (transformerRef.current) {
-      transformerRef.current.nodes([]);
+    if (selectedIds.length === 0) {
+      transformer.nodes([]);
+      return;
     }
-  }, [selectedIds]);
+
+    const nodes = [] as Konva.Node[];
+
+    selectedIds.forEach((id) => {
+      const type = id.split(" ")[0];
+      let data = null;
+
+      if (type === "Rectangle") data = rectRefs.current.get(id);
+      else if (type === "Ellipse") data = ellipseRefs.current.get(id);
+
+      if (data) nodes.push(data);
+    });
+
+    if (isCreating && drawingShapeRef.current) {
+      transformerRef.current?.nodes([drawingShapeRef.current]);
+    } else {
+      transformerRef.current?.nodes(nodes);
+    }
+
+  }, [selectedIds, isCreating]);
 
   return (
     <ShapeRefContext.Provider
@@ -58,7 +87,11 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         ellipseRefs,
         setSelectedIds,
         setMode,
-        mode
+        isCreating,
+        setIsCreating,
+        tempShape,
+        tempShapeDispatch,
+        mode,
       }}
     >
       {children}

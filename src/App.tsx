@@ -1,4 +1,3 @@
-
 import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
 import useModeHandlers from "./hooks/useModeHandlers";
 import { useAtomValue } from "jotai";
@@ -6,6 +5,7 @@ import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
 import Tooltip from "./components/ToolTip";
+import SideBar from "./components/SideBar";
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
@@ -28,9 +28,17 @@ const App = () => {
     handleTransformEnd,
   } = useModeHandlers();
 
-
   return (
     <>
+      <SideBar className="leftSideBarLayout flex_col">
+        <SideBar.Header content="제목1" type="big" className="paddingSideBar" />
+        <SideBar.SpaceBar />
+        <SideBar.Header content="Shapes" type="small" className="paddingSideBar paddingSideBarMedium" />
+        <SideBar.SpaceBar />
+        <SideBar.Content >
+          {[...rectangles, ...ellipses].map(({name, id}) => <div>{name} {id}</div>)}
+        </SideBar.Content> 
+      </SideBar>
       <Tooltip />
       <Stage
         width={window.innerWidth}
@@ -62,11 +70,7 @@ const App = () => {
           ))}
 
           {tempShape && mode === "RECT" && (
-            <Rect
-              {...tempShape}
-              ref={drawingShapeRef}
-              draggable={true}
-            />
+            <Rect {...tempShape} ref={drawingShapeRef} draggable={true} />
           )}
 
           {ellipses.map((ellipse) => (
@@ -100,11 +104,7 @@ const App = () => {
           ))}
 
           {tempShape && mode === "ELLIPSE" && (
-            <Ellipse
-              {...tempShape}
-              ref={drawingShapeRef}
-              draggable={false}
-            />
+            <Ellipse {...tempShape} ref={drawingShapeRef} draggable={false} />
           )}
 
           {mode === "SELECT" && tempShape && tempShape.visible && (

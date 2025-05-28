@@ -82,19 +82,23 @@ export default function useModeHandlers() {
   const shapeAll = useAtomValue(shapeAllData); 
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  const isDragging = useRef(true);
   const setterFunc = {
     Rect: setRectangles,
     Ellipse: setEllipses,
   };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-    if (e.target.getType() !== "Shape") {
+    if (isDragging.current) {
       return;
     }
+    
+
     if (e.target === e.target.getStage()) {
       setSelectedIds([]);
       return;
     }
+    
 
     const clickedId = e.target.id();
 
@@ -112,13 +116,13 @@ export default function useModeHandlers() {
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    if (e.target !== e.target.getStage()) return;
+    if (e.target !== e.target.getStage() || isDragging.current) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
 
     setIsCreating(true)
-    // isCreating.current = true;
     startPoint.current = pos;
+
 
     tempShapeDispatch({
       type: mode,
@@ -128,6 +132,7 @@ export default function useModeHandlers() {
         maxID: shapeMaxID(mode),
         visible: true,
         select: {
+          name: "select",
           visible: true,
           x1: pos.x,
           y1: pos.y,
@@ -148,13 +153,12 @@ export default function useModeHandlers() {
 
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
-
+    isDragging.current = true;
     tempShapeDispatch({
       type: mode,
       data: {
         startPoint: startPoint.current,
         pos,
-        maxID: shapeMaxID(mode),
         visible: true,
         select: {
           ...tempShape,
@@ -221,12 +225,15 @@ export default function useModeHandlers() {
     if (tempShape && ("width" in tempShape) && (tempShape.height < 5 || tempShape.width < 5)) return;
     setIsCreating(false);
 
-    if (mode === "RECT") setRectangles([...rectangles, tempShape as RectShape]);
+    if (mode === "RECT" && tempShape.name === 'Rectangle') setRectangles([...rectangles, tempShape as RectShape]);
     else if (mode === "ELLIPSE")
       setEllipses([...ellipses, tempShape as EllipseShape]);
 
     setMode("SELECT");
-
+    tempShapeDispatch({
+        type: "INIT",
+        data: null as any,
+      });
     selectShapesByDrageInit(e);
   };
 
@@ -237,20 +244,8 @@ export default function useModeHandlers() {
     if (!pos) return;
 
     setTimeout(() => {
-      tempShapeDispatch({
-        type: mode,
-        data: {
-          startPoint: startPoint.current,
-          pos,
-          maxID: shapeMaxID(mode),
-          visible: false,
-          select: {
-            ...tempShape,
-            visible: false,
-          },
-        },
-      });
-    });
+      isDragging.current = false;
+    }, 10);
   };
 
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {

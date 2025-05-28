@@ -28,6 +28,7 @@ const App = () => {
     handleTransformEnd,
   } = useModeHandlers();
 
+
   return (
     <>
       <Tooltip />
@@ -64,8 +65,6 @@ const App = () => {
             <Rect
               {...tempShape}
               ref={drawingShapeRef}
-              name="rect"
-              id="creating"
               draggable={true}
             />
           )}
@@ -104,8 +103,6 @@ const App = () => {
             <Ellipse
               {...tempShape}
               ref={drawingShapeRef}
-              name="ellipse"
-              id="creating"
               draggable={false}
             />
           )}

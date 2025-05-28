@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Mode } from "../type/Shape";
 
 type Position = {
@@ -47,24 +48,28 @@ export type SelectionBox = {
   y:number
 };
 
-export type TempShape = RectShape | EllipseShape | SelectionBox;
+export type TempShape = RectShape | EllipseShape | SelectionBox ;
 
 export type TempShapeAction = {
-  type: Mode;
+  type: Mode | "INIT";
   data: {
     pos: Position;
-    maxID: number;
+    maxID?: number;
     startPoint: Position;
     visible: boolean;
     select?: object
-  };
+  } ;
 };
 
 export function tempShapeReducer(
   old: TempShape | null,
   action: TempShapeAction
 ): TempShape {
+
   switch (action.type) {
+    case "INIT":
+      return null as any;
+
     case "RECT":
       return {
         id: action.data.maxID,

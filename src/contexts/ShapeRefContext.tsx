@@ -1,6 +1,13 @@
 import type Konva from "konva";
 import type { Rect } from "konva/lib/shapes/Rect";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode, RefObject } from "react";
 
 type Mode = "RECT" | "SELECT" | "ELLIPSE";
@@ -13,7 +20,7 @@ interface ShapeRefContextType {
   selectedIds: string[];
   setSelectedIds: (ids: string[]) => void;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
-  mode: Mode
+  mode: Mode;
 }
 
 const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
@@ -23,11 +30,31 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, {});
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
   const transformerRef = useRef(null);
   const drawingShapeRef = useRef(null);
-  
+
+  useEffect(() => {
+    console.log(tempShape);
+  }, [tempShape])
+
+  function tempShapeReducer(old, action) {
+    switch (action.type) {
+      case "RECT":
+        return action.data;
+      default:
+        return {
+          visible: true,
+          x1: action.data.pos.x,
+          y1: action.data.pos.y,
+          x2: action.data.pos.x,
+          y2: action.data.pos.y,
+        };
+    }
+  }
+
   useEffect(() => {
     if (selectedIds.length && transformerRef.current) {
       const nodes = [];
@@ -41,7 +68,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
 
         if (data) nodes.push(data);
       });
-      
+
       transformerRef.current.nodes(nodes);
     } else if (transformerRef.current) {
       transformerRef.current.nodes([]);
@@ -58,7 +85,9 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         ellipseRefs,
         setSelectedIds,
         setMode,
-        mode
+        tempShape,
+        tempShapeDispatch,
+        mode,
       }}
     >
       {children}

@@ -1,5 +1,21 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 
+export interface EllipseType {
+  id: number;
+  name : string;
+  x: number;
+  y: number;
+  radiusX: number;
+  radiusY: number;
+  fill?: string;
+  rotation: number; 
+  stroke: string;
+  strokeWidth?: number;
+  type?: string;
+  width: number;
+  height: number;
+}
+
 export interface RectType {
   id: number;
   name : string;
@@ -20,6 +36,7 @@ export interface HandlerProps {
   handleDragEnd? : (e: KonvaEventObject<MouseEvent>) => void;
   handleTransformEnd? : (e: KonvaEventObject<MouseEvent>) => void;
   creatingRect?: RectType | null;
+  creatingEllipse? : EllipseType | null;
   selectionRectangle?: SelectRectangleProps | null
 }
 

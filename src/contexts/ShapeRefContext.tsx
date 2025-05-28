@@ -1,12 +1,13 @@
 import type Konva from "konva";
 import type { Rect } from "konva/lib/shapes/Rect";
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 
-type Mode = "RECT" | "SELECT";
+type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
+  ellipseRefs: RefObject<Map<string, Rect>>;
   transformerRef: React.RefObject<Konva.Transformer | null>;
   drawingShapeRef: RefObject<Rect | null>;
   selectedIds: string[];
@@ -20,11 +21,32 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const rectRefs = useRef(new Map());
+  const ellipseRefs = useRef(new Map());
   const transformerRef = useRef(null);
   const drawingShapeRef = useRef(null);
+  
+  useEffect(() => {
+    if (selectedIds.length && transformerRef.current) {
+      const nodes = [];
+
+      selectedIds.forEach((id) => {
+        const type = id.split(" ")[0];
+        let data = null;
+
+        if (type === "Rectangle") data = rectRefs.current.get(id);
+        else data = ellipseRefs.current.get(id);
+
+        if (data) nodes.push(data);
+      });
+      
+      transformerRef.current.nodes(nodes);
+    } else if (transformerRef.current) {
+      transformerRef.current.nodes([]);
+    }
+  }, [selectedIds]);
 
   return (
     <ShapeRefContext.Provider
@@ -33,6 +55,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         transformerRef,
         selectedIds,
         drawingShapeRef,
+        ellipseRefs,
         setSelectedIds,
         setMode,
         mode

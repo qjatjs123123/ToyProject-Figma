@@ -1,14 +1,22 @@
-import './App.css'
-import { Stage, Layer, Transformer, Rect } from "react-konva";
+import "./App.css";
+import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
 import useModeHandlers from "./hooks/useModeHandlers";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
+import { EllipseAtom } from "./Atoms/EllipseState";
+import { useEffect } from "react";
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
-  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
-    useShapeRefState();
+  const ellipses = useAtomValue(EllipseAtom);
+  const {
+    ellipseRefs,
+    rectRefs,
+    transformerRef,
+    drawingShapeRef,
+    selectedIds,
+  } = useShapeRefState();
   const {
     handleMouseDown,
     handleMouseMove,
@@ -17,6 +25,7 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
     creatingRect,
+    creatingEllipse,
     selectionRectangle,
   } = useModeHandlers();
 
@@ -46,6 +55,7 @@ const App = () => {
             }
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}
+            rotation={rect.rotation}
           />
         ))}
 
@@ -54,6 +64,43 @@ const App = () => {
             {...creatingRect}
             ref={drawingShapeRef}
             name="rect"
+            id="creating"
+            draggable={false}
+          />
+        )}
+
+        {ellipses.map((ellipse) => (
+          <Ellipse
+            key={`${ellipse.name} ${ellipse.id}`}
+            id={`${ellipse.name} ${ellipse.id}`}
+            x={ellipse.x}
+            y={ellipse.y}
+            radiusX={ellipse.radiusX}
+            radiusY={ellipse.radiusY}
+            fill={ellipse.fill}
+            stroke={
+              selectedIds.includes(`${ellipse.name} ${ellipse.id}`)
+                ? "#80D0FF"
+                : ""
+            }
+            strokeWidth={ellipse.strokeWidth}
+            ref={(node) => {
+              if (node) {
+                ellipseRefs.current.set(`${ellipse.name} ${ellipse.id}`, node);
+              }
+            }}
+            draggable={true}
+            onDragEnd={handleDragEnd}
+            onTransformEnd={handleTransformEnd}
+            rotation={ellipse.rotation}
+          />
+        ))}
+
+        {creatingEllipse && (
+          <Ellipse
+            {...creatingEllipse}
+            ref={drawingShapeRef}
+            name="ellipse"
             id="creating"
             draggable={false}
           />

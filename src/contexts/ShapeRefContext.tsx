@@ -29,7 +29,7 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
   const rectRefs = useRef(new Map());

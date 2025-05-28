@@ -44,24 +44,37 @@ type SelectionBox = {
 type TempShape = RectShape | EllipseShape | SelectionBox;
 
 type TempShapeAction =
-  | { type: "RECT"; data: RectShape }
-  | { type: "ELLIPSE"; data: { pos: Position; maxID: number } }
-  | { type: "DEFAULT"; data: { pos: Position } };
+  | {
+      type: "RECT";
+      data: { pos: Position; maxID: number; startPoint: Position };
+    }
+  | {
+      type: "ELLIPSE";
+      data: { pos: Position; maxID: number; startPoint: Position };
+    }
+  | { type: "DEFAULT"; data: { pos: Position; startPoint: Position } };
 
-
-export function tempShapeReducer(old: TempShape | null, action: TempShapeAction): TempShape {
+export function tempShapeReducer(
+  old: TempShape | null,
+  action: TempShapeAction
+): TempShape {
   switch (action.type) {
     case "RECT":
-      return action.data;
+      return {
+        ...old,
+        x: action.data.pos.x,
+        y: action.data.pos.y,
+        width: 0,
+        height: 0,
+        id: action.data.maxID,
+        name: "Rectangle",
+        type: "shape",
+        fill: "#D9D9D9",
+        rotation: 0,
+      } as RectShape;
 
     case "ELLIPSE":
       return {
-        x: action.data.pos.x,
-        y: action.data.pos.y,
-        radiusX: 0,
-        radiusY: 0,
-        width: 0,
-        height: 0,
         id: action.data.maxID,
         name: "Ellipse",
         type: "shape",
@@ -69,15 +82,22 @@ export function tempShapeReducer(old: TempShape | null, action: TempShapeAction)
         rotation: 0,
         stroke: "black",
         strokeWidth: 2,
-      };
-
+        ...old,
+        x: (action.data.startPoint.x + action.data.pos.x) / 2,
+        y: (action.data.startPoint.y + action.data.pos.y) / 2,
+        radiusX: Math.abs(action.data.pos.x - action.data.startPoint.x) / 2,
+        radiusY: Math.abs(action.data.pos.y - action.data.startPoint.y) / 2,
+        width: Math.abs(action.data.pos.x - action.data.startPoint.x),
+        height: Math.abs(action.data.pos.y - action.data.startPoint.y),
+      } as EllipseShape;
     default: // "DEFAULT"
       return {
+        ...old,
         visible: true,
         x1: action.data.pos.x,
         y1: action.data.pos.y,
         x2: action.data.pos.x,
         y2: action.data.pos.y,
-      };
+      } as SelectionBox;
   }
 }

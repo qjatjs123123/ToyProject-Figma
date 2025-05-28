@@ -1,11 +1,10 @@
 import "./App.css";
 import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
-import useModeHandlers from "./hooks/useModeHandlers";
-import { useAtom, useAtomValue } from "jotai";
+import useModeHandlers from "./hooks/useModeHandlers"
+import { useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
-import { useEffect } from "react";
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
@@ -16,6 +15,8 @@ const App = () => {
     transformerRef,
     drawingShapeRef,
     selectedIds,
+    tempShape,
+    mode,
   } = useShapeRefState();
   const {
     handleMouseDown,
@@ -24,9 +25,6 @@ const App = () => {
     handleStageClick,
     handleDragEnd,
     handleTransformEnd,
-    creatingRect,
-    creatingEllipse,
-    selectionRectangle,
   } = useModeHandlers();
 
   return (
@@ -44,7 +42,7 @@ const App = () => {
             {...rect}
             key={`${rect.name} ${rect.id}`}
             id={`${rect.name} ${rect.id}`}
-            draggable
+            
             ref={(node) => {
               if (node) {
                 rectRefs.current.set(`${rect.name} ${rect.id}`, node);
@@ -56,16 +54,17 @@ const App = () => {
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}
             rotation={rect.rotation}
+            draggable={true}
           />
         ))}
 
-        {creatingRect && (
+        {tempShape && mode === 'RECT' && (
           <Rect
-            {...creatingRect}
+            {...tempShape}
             ref={drawingShapeRef}
             name="rect"
             id="creating"
-            draggable={false}
+            draggable={true}
           />
         )}
 
@@ -96,9 +95,9 @@ const App = () => {
           />
         ))}
 
-        {creatingEllipse && (
+        {tempShape && mode === 'ELLIPSE' && (
           <Ellipse
-            {...creatingEllipse}
+            {...tempShape}
             ref={drawingShapeRef}
             name="ellipse"
             id="creating"
@@ -106,12 +105,12 @@ const App = () => {
           />
         )}
 
-        {selectionRectangle && selectionRectangle.visible && (
+        {mode === 'SELECT' && tempShape && tempShape.visible && (
           <Rect
-            x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
-            y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}
-            width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
-            height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
+            x={Math.min(tempShape.x1, tempShape.x2)}
+            y={Math.min(tempShape.y1, tempShape.y2)}
+            width={Math.abs(tempShape.x2 - tempShape.x1)}
+            height={Math.abs(tempShape.y2 - tempShape.y1)}
             fill="rgba(40, 108, 255, 0.36)"
             stroke="#80D0FF"
           />

@@ -1,9 +1,11 @@
+import type { Mode } from "../type/Shape";
+
 type Position = {
   x: number;
   y: number;
 };
 
-type RectShape = {
+export type RectShape = {
   x: number;
   y: number;
   width: number;
@@ -17,7 +19,7 @@ type RectShape = {
   strokeWidth: number;
 };
 
-type EllipseShape = {
+export type EllipseShape = {
   x: number;
   y: number;
   radiusX: number;
@@ -33,26 +35,30 @@ type EllipseShape = {
   strokeWidth: number;
 };
 
-type SelectionBox = {
+export type SelectionBox = {
   visible: boolean;
   x1: number;
   y1: number;
   x2: number;
   y2: number;
+  width: number;
+  height: number;
+  x:number,
+  y:number
 };
 
-type TempShape = RectShape | EllipseShape | SelectionBox;
+export type TempShape = RectShape | EllipseShape | SelectionBox;
 
-type TempShapeAction =
-  | {
-      type: "RECT";
-      data: { pos: Position; maxID: number; startPoint: Position };
-    }
-  | {
-      type: "ELLIPSE";
-      data: { pos: Position; maxID: number; startPoint: Position };
-    }
-  | { type: "DEFAULT"; data: { pos: Position; startPoint: Position } };
+export type TempShapeAction = {
+  type: Mode;
+  data: {
+    pos: Position;
+    maxID: number;
+    startPoint: Position;
+    visible: boolean;
+    select?: object
+  };
+};
 
 export function tempShapeReducer(
   old: TempShape | null,
@@ -61,16 +67,16 @@ export function tempShapeReducer(
   switch (action.type) {
     case "RECT":
       return {
-        ...old,
-        x: action.data.pos.x,
-        y: action.data.pos.y,
-        width: 0,
-        height: 0,
         id: action.data.maxID,
         name: "Rectangle",
         type: "shape",
         fill: "#D9D9D9",
         rotation: 0,
+        ...old,
+        x: Math.min(action.data.startPoint.x, action.data.pos.x),
+        y: Math.min(action.data.startPoint.y, action.data.pos.y),
+        width: Math.abs(action.data.pos.x - action.data.startPoint.x),
+        height: Math.abs(action.data.pos.y - action.data.startPoint.y),
       } as RectShape;
 
     case "ELLIPSE":
@@ -90,14 +96,10 @@ export function tempShapeReducer(
         width: Math.abs(action.data.pos.x - action.data.startPoint.x),
         height: Math.abs(action.data.pos.y - action.data.startPoint.y),
       } as EllipseShape;
+
+    case "SELECT":
+      return action.data.select as SelectionBox;
     default: // "DEFAULT"
-      return {
-        ...old,
-        visible: true,
-        x1: action.data.pos.x,
-        y1: action.data.pos.y,
-        x2: action.data.pos.x,
-        y2: action.data.pos.y,
-      } as SelectionBox;
+      throw new Error("에러");
   }
 }

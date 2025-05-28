@@ -9,18 +9,24 @@ import {
   useState,
 } from "react";
 import type { ReactNode, RefObject } from "react";
-import { tempShapeReducer } from "./shapeReducer";
+import {
+  tempShapeReducer,
+  type TempShape,
+  type TempShapeAction,
+} from "./shapeReducer";
 
 type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
   ellipseRefs: RefObject<Map<string, Rect>>;
+  tempShape: TempShape | null;
   transformerRef: React.RefObject<Konva.Transformer | null>;
   drawingShapeRef: RefObject<Rect | null>;
   selectedIds: string[];
   setSelectedIds: (ids: string[]) => void;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
+  tempShapeDispatch: React.Dispatch<TempShapeAction>;
   mode: Mode;
 }
 
@@ -32,17 +38,15 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>("RECT"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
+
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
-  const transformerRef= useRef<Konva.Transformer>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
   const drawingShapeRef = useRef(null);
 
   useEffect(() => {
-    console.log(tempShape);
-  }, [tempShape]);
-
-  useEffect(() => {
     const transformer = transformerRef.current;
+
     if (!transformer) return;
 
     if (selectedIds.length === 0) {
@@ -57,13 +61,17 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
       let data = null;
 
       if (type === "Rectangle") data = rectRefs.current.get(id);
-      else if(type === "Ellipse") data = ellipseRefs.current.get(id);
+      else if (type === "Ellipse") data = ellipseRefs.current.get(id);
 
       if (data) nodes.push(data);
     });
 
-    transformerRef.current?.nodes(nodes);
-   
+    if (nodes.length == 0 && drawingShapeRef.current){
+      transformerRef.current?.nodes([drawingShapeRef.current]);
+    }else {
+      transformerRef.current?.nodes(nodes);
+    }
+
   }, [selectedIds]);
 
   return (

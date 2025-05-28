@@ -16,6 +16,8 @@ export default function useModeHandlers(): HandlerProps {
       return rectHandlers
     case "ELLIPSE":
       return ellipseHandlers
+    case "SELECT" :
+      return selectHandlers
     default:
       return selectHandlers
   }

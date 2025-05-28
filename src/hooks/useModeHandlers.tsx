@@ -74,8 +74,10 @@ export default function useModeHandlers() {
     tempShape,
     tempShapeDispatch,
     mode,
+    isCreating,
+    setIsCreating
   } = useShapeRefState();
-  const isCreating = useRef(false);
+  
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
   const shapeAll = useAtomValue(shapeAllData); 
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
@@ -86,7 +88,6 @@ export default function useModeHandlers() {
   };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-    console.log("click")
     if (e.target.getType() !== "Shape") {
       return;
     }
@@ -115,7 +116,8 @@ export default function useModeHandlers() {
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
 
-    isCreating.current = true;
+    setIsCreating(true)
+    // isCreating.current = true;
     startPoint.current = pos;
 
     tempShapeDispatch({
@@ -140,7 +142,7 @@ export default function useModeHandlers() {
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isCreating.current) {
+    if (!isCreating) {
       return;
     }
 
@@ -213,16 +215,16 @@ export default function useModeHandlers() {
   };
 
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isCreating.current) {
+    if (!isCreating) {
       return;
     }
     if (tempShape && ("width" in tempShape) && (tempShape.height < 5 || tempShape.width < 5)) return;
-    isCreating.current = false;
+    setIsCreating(false);
 
     if (mode === "RECT") setRectangles([...rectangles, tempShape as RectShape]);
     else if (mode === "ELLIPSE")
       setEllipses([...ellipses, tempShape as EllipseShape]);
-    isCreating.current = false;
+
     setMode("SELECT");
 
     selectShapesByDrageInit(e);

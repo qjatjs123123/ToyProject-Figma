@@ -16,31 +16,40 @@ export default function useModeRect() {
   const [creatingRect, setCreatingRect] = useState<RectType | null>(null);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const maxID = useAtomValue(rectangleMaxID);
-  const isCreating = useRef(false);
+
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
-  const { drawingShapeRef, rectRefs, transformerRef, selectedIds, setSelectedIds, setMode } = useShapeRefState();
+  const {
+    isCreating,
+    setIsCreating,
+    drawingShapeRef,
+    rectRefs,
+    transformerRef,
+    selectedIds,
+    setSelectedIds,
+    setMode,
+  } = useShapeRefState();
 
   useEffect(() => {
     if (selectedIds.length && transformerRef.current) {
       const nodes = selectedIds
-        .map(id => rectRefs.current.get(id))
-        .filter(node => node instanceof Rect);
-      
-      if (nodes.length > 0)   
-        transformerRef.current.nodes(nodes);
-      
+        .map((id) => rectRefs.current.get(id))
+        .filter((node) => node instanceof Rect);
+
+      if (nodes.length > 0) transformerRef.current.nodes(nodes);
+
       if (nodes.length == 0 && drawingShapeRef.current)
-        transformerRef.current.nodes([drawingShapeRef.current])
+        transformerRef.current.nodes([drawingShapeRef.current]);
     }
   }, [selectedIds, creatingRect]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
+    console.log("down")
     if (e.target !== e.target.getStage()) return;
 
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
-
-    isCreating.current = true;
+    
+    setIsCreating(true);
     startPoint.current = pos;
 
     setCreatingRect({
@@ -59,7 +68,7 @@ export default function useModeRect() {
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isCreating.current || !startPoint.current || !creatingRect) return;
+    if (!isCreating || !startPoint.current || !creatingRect) return;
 
     const pos = e.target.getStage()?.getPointerPosition() as RectType;
 
@@ -73,14 +82,14 @@ export default function useModeRect() {
   };
 
   const handleMouseUp = () => {
-    if (!isCreating.current || !startPoint.current) return;
+    if (!isCreating || !startPoint.current) return;
     if (!creatingRect || creatingRect.width <= 5 || creatingRect.height <= 5)
       return;
 
     setRectangles([...rectangles, creatingRect]);
     setCreatingRect(null);
-    isCreating.current = false;
-    setMode('SELECT')
+    setIsCreating(false);
+    setMode("SELECT");
   };
 
   return {
@@ -89,6 +98,6 @@ export default function useModeRect() {
     handleMouseUp,
     transformerRef,
     rectRefs,
-    creatingRect
+    creatingRect,
   };
 }

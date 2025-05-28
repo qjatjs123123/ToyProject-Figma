@@ -72,7 +72,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
       transformerRef.current?.nodes(nodes);
     }
 
-  }, [selectedIds]);
+  }, [selectedIds, tempShape]);
 
   return (
     <ShapeRefContext.Provider

@@ -68,7 +68,6 @@ const mappingTable = {
 
 export default function useModeHandlers() {
   const {
-    transformerRef,
     selectedIds,
     setSelectedIds,
     setMode,
@@ -78,7 +77,7 @@ export default function useModeHandlers() {
   } = useShapeRefState();
   const isCreating = useRef(false);
   const startPoint = useRef<PointProps>({ x: 0, y: 0 });
-  const shapeAll = useAtomValue(shapeAllData); // 공통통
+  const shapeAll = useAtomValue(shapeAllData); 
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const setterFunc = {
@@ -87,7 +86,7 @@ export default function useModeHandlers() {
   };
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-
+    console.log("click")
     if (e.target.getType() !== "Shape") {
       return;
     }
@@ -109,7 +108,6 @@ export default function useModeHandlers() {
       setSelectedIds([...selectedIds, clickedId]);
     }
 
-    console.log(selectedIds);
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {

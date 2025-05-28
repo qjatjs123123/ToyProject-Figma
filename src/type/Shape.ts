@@ -8,10 +8,12 @@ export interface EllipseType {
   radiusX: number;
   radiusY: number;
   fill?: string;
-  rotation?: number; 
-  stroke?: string;
+  rotation: number; 
+  stroke: string;
   strokeWidth?: number;
   type?: string;
+  width: number;
+  height: number;
 }
 
 export interface RectType {

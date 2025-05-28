@@ -9,7 +9,7 @@ import { EllipseAtom } from "./Atoms/EllipseState";
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
   const ellipses = useAtomValue(EllipseAtom);
-  const { rectRefs, transformerRef, drawingShapeRef, selectedIds } =
+  const { ellipseRefs, rectRefs, transformerRef, drawingShapeRef, selectedIds } =
     useShapeRefState();
   const {
     handleMouseDown,
@@ -49,6 +49,7 @@ const App = () => {
             }
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}
+            rotation={rect.rotation}
           />
         ))}
 
@@ -65,13 +66,25 @@ const App = () => {
         {ellipses.map((ellipse) => (
           <Ellipse
             key={`${ellipse.name} ${ellipse.id}`}
+            id={`${ellipse.name} ${ellipse.id}`}
             x={ellipse.x}
             y={ellipse.y}
             radiusX={ellipse.radiusX}
             radiusY={ellipse.radiusY}
             fill={ellipse.fill}
-            stroke={ellipse.stroke}
+            stroke={
+              selectedIds.includes(`${ellipse.name} ${ellipse.id}`) ? "#80D0FF" : ""
+            }
             strokeWidth={ellipse.strokeWidth}
+            ref={(node) => {
+              if (node) {
+                ellipseRefs.current.set(`${ellipse.name} ${ellipse.id}`, node);
+              }
+            }}
+            draggable={true}
+            onDragEnd={handleDragEnd}
+            onTransformEnd={handleTransformEnd}
+            rotation={ellipse.rotation}
           />
         ))}
 

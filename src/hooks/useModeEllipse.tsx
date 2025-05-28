@@ -56,6 +56,8 @@ export default function useModeEllipse() {
       y: pos.y,
       radiusX: 0,
       radiusY: 0,
+      width: 0,
+      height: 0,
       id: maxID,
       name: "Ellipse",
       type: "shape",
@@ -81,6 +83,8 @@ export default function useModeEllipse() {
       y: (startPoint.current.y + pos.y) / 2,
       radiusX: Math.abs(pos.x - startPoint.current.x) / 2,
       radiusY: Math.abs(pos.y - startPoint.current.y) / 2,
+      width: Math.abs(pos.x - startPoint.current.x),
+      height: Math.abs(pos.y - startPoint.current.y)
     });
   };
 
@@ -90,15 +94,15 @@ export default function useModeEllipse() {
     // 여기도 다름
     if (
       !creatingEllipse ||
-      creatingEllipse.radiusX <= 5 ||
-      creatingEllipse.radiusY <= 5
+      creatingEllipse.width <= 5 ||
+      creatingEllipse.height <= 5
     )
       return;
 
     setEllipses([...ellipses, creatingEllipse]);
     setCreatingEllipse(null);
     isCreating.current = false;
-    // setMode("SELECT");
+    setMode("SELECT");
   };
 
   return {

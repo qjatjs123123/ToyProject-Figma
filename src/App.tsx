@@ -23,6 +23,7 @@ const App = () => {
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const [showPicker, setShowPicker] = useState(false);
+  const [showStrokePicker, setShowStrokePicker] = useState(false);
   const {
     ellipseRefs,
     rectRefs,
@@ -57,6 +58,23 @@ const App = () => {
       );
     }
   };
+
+  const handleChangeSrokeColor = (selectedColor, shape) => {
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
+        )
+      );
+    }
+  };
+
 
   return (
     <>
@@ -118,7 +136,7 @@ const App = () => {
             className="center relative"
             onClick={() => setShowPicker(!showPicker)}
           >
-            {selectedIds.length > 0 &&
+            {selectedIds.length > 0 ? (
               (() => {
                 const shape = getShapeObject(
                   selectedIds[selectedIds.length - 1]
@@ -150,11 +168,66 @@ const App = () => {
                     )}
                   </div>
                 );
-              })()}
+              })()
+            ) : (
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            )}
           </Button>
         </SideBar.Content>
 
         <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Stroke"
+        />
+        <SideBar.Content  style={{ paddingLeft: "12px", marginBottom: "10px" }}>
+          <Button
+            className="center relative"
+            onClick={() => setShowStrokePicker(!showStrokePicker)}
+          >
+            {selectedIds.length > 0 ? (
+              (() => {
+                const shape = getShapeObject(
+                  selectedIds[selectedIds.length - 1]
+                )[0];
+                const strokeColor = shape?.stroke || "";
+
+                return (
+                  <div className="color-display">
+                    <div
+                      className="color-box"
+                      style={{ backgroundColor: strokeColor }}
+                    />
+                    <span>{strokeColor}</span>
+                    {showStrokePicker && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "-235px",
+                          top: "0",
+                        }}
+                      >
+                        <SketchPicker
+                          color={strokeColor}
+                          onChangeComplete={(color) =>
+                            handleChangeSrokeColor(color, shape)
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
+            ) : (
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            )}
+          </Button>
+        </SideBar.Content>
       </SideBar>
 
       <Tooltip />
@@ -178,7 +251,7 @@ const App = () => {
                 }
               }}
               stroke={
-                selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
+                selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : rect.stroke
               }
               onDragEnd={handleDragEnd}
               onTransformEnd={handleTransformEnd}
@@ -203,7 +276,7 @@ const App = () => {
               stroke={
                 selectedIds.includes(`${ellipse.name} ${ellipse.id}`)
                   ? "#80D0FF"
-                  : ""
+                  : ellipse.stroke
               }
               strokeWidth={ellipse.strokeWidth}
               ref={(node) => {

@@ -1,14 +1,30 @@
-import "./App.css";
 import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
-import useModeHandlers from "./hooks/useModeHandlers"
-import { useAtomValue } from "jotai";
+import useModeHandlers from "./hooks/useModeHandlers";
+import { useAtom, useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
+import Tooltip from "./components/ToolTip";
+import SideBar from "./components/SideBar";
+import RectIcon from "./components/RectIcon";
+import EllipseIcon from "./components/EllipseIcon";
+import Button from "./components/Button";
+import { SketchPicker } from "react-color";
+import { useState } from "react";
+import Input from "./components/Input";
+
+type ShapeName = "Rectangle" | "Ellipse";
+
+const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
+  Rectangle: (color: string) => <RectIcon color={color} />,
+  Ellipse: (color: string) => <EllipseIcon color={color} />,
+};
 
 const App = () => {
-  const rectangles = useAtomValue(rectangleAtom);
-  const ellipses = useAtomValue(EllipseAtom);
+  const [rectangles, setRectangles] = useAtom(rectangleAtom);
+  const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  const [showPicker, setShowPicker] = useState(false);
+  const [showStrokePicker, setShowStrokePicker] = useState(false);
   const {
     ellipseRefs,
     rectRefs,
@@ -16,6 +32,8 @@ const App = () => {
     drawingShapeRef,
     selectedIds,
     tempShape,
+    setSelectedIds,
+    getShapeObject,
     mode,
   } = useShapeRefState();
   const {
@@ -26,107 +44,339 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
   } = useModeHandlers();
+  const handleChangeColor = (selectedColor, shape) => {
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
+        )
+      );
+    }
+  };
+
+  const handleChangeSrokeColor = (selectedColor, shape) => {
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
+        )
+      );
+    }
+  };
+
+  const handleChangeStrokeNum = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value, 10);
+    const shape = getShapeObject(selectedIds[selectedIds.length - 1])[0];
+
+    if (isNaN(newValue) || newValue <= 4 || newValue >= 51) return;
+
+    let alpha = 0;
+    const value = shape.strokeWidth;
+
+    if (newValue < value) alpha = -1;
+    else alpha = +1;
+
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id
+            ? { ...item, strokeWidth: item.strokeWidth + alpha }
+            : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id
+            ? { ...item, strokeWidth: item.strokeWidth + alpha }
+            : item
+        )
+      );
+    }
+  };
 
   return (
-    <Stage
-      width={window.innerWidth}
-      height={window.innerHeight}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onClick={handleStageClick}
-    >
-      <Layer>
-        {rectangles.map((rect) => (
-          <Rect
-            {...rect}
-            key={`${rect.name} ${rect.id}`}
-            id={`${rect.name} ${rect.id}`}
-            
-            ref={(node) => {
-              if (node) {
-                rectRefs.current.set(`${rect.name} ${rect.id}`, node);
-              }
-            }}
-            stroke={
-              selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : ""
-            }
-            onDragEnd={handleDragEnd}
-            onTransformEnd={handleTransformEnd}
-            rotation={rect.rotation}
-            draggable={true}
-          />
-        ))}
-
-        {tempShape && mode === 'RECT' && (
-          <Rect
-            {...tempShape}
-            ref={drawingShapeRef}
-            name="rect"
-            id="creating"
-            draggable={true}
-          />
-        )}
-
-        {ellipses.map((ellipse) => (
-          <Ellipse
-            key={`${ellipse.name} ${ellipse.id}`}
-            id={`${ellipse.name} ${ellipse.id}`}
-            x={ellipse.x}
-            y={ellipse.y}
-            radiusX={ellipse.radiusX}
-            radiusY={ellipse.radiusY}
-            fill={ellipse.fill}
-            stroke={
-              selectedIds.includes(`${ellipse.name} ${ellipse.id}`)
-                ? "#80D0FF"
-                : ""
-            }
-            strokeWidth={ellipse.strokeWidth}
-            ref={(node) => {
-              if (node) {
-                ellipseRefs.current.set(`${ellipse.name} ${ellipse.id}`, node);
-              }
-            }}
-            draggable={true}
-            onDragEnd={handleDragEnd}
-            onTransformEnd={handleTransformEnd}
-            rotation={ellipse.rotation}
-          />
-        ))}
-
-        {tempShape && mode === 'ELLIPSE' && (
-          <Ellipse
-            {...tempShape}
-            ref={drawingShapeRef}
-            name="ellipse"
-            id="creating"
-            draggable={false}
-          />
-        )}
-
-        {mode === 'SELECT' && tempShape && tempShape.visible && (
-          <Rect
-            x={Math.min(tempShape.x1, tempShape.x2)}
-            y={Math.min(tempShape.y1, tempShape.y2)}
-            width={Math.abs(tempShape.x2 - tempShape.x1)}
-            height={Math.abs(tempShape.y2 - tempShape.y1)}
-            fill="rgba(40, 108, 255, 0.36)"
-            stroke="#80D0FF"
-          />
-        )}
-
-        <Transformer
-          ref={transformerRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
+    <>
+      <SideBar className="leftSideBarLayout flex_col">
+        <SideBar.Header content="제목1" type="big" className="paddingSideBar" />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          content="Shapes"
+          style={{ marginTop: "10px", marginBottom: "10px" }}
+          className="paddingSideBar paddingSideBarMedium"
         />
-      </Layer>
-    </Stage>
+        <SideBar.SpaceBar />
+        <SideBar.Content className="overflow-y">
+          {[...rectangles, ...ellipses].map(({ name, id }) => (
+            <div
+              key={`${name} ${id}`}
+              onClick={() => setSelectedIds([...selectedIds, `${name} ${id}`])}
+              className={`shape-item${
+                selectedIds.includes(`${name} ${id}`) ? " primary" : ""
+              }`}
+            >
+              {shapeItemMap[name as ShapeName]("black")}
+              <span>
+                {name} {id}
+              </span>
+            </div>
+          ))}
+        </SideBar.Content>
+      </SideBar>
+
+      <SideBar className="rightSideBarLayout flex_col">
+        <SideBar.Header
+          className="paddingSideBar"
+          content={<Button className="btnPad">Design</Button>}
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          content={
+            selectedIds.length === 1
+              ? selectedIds[0].split(" ")[0]
+              : `${selectedIds.length} selected`
+          }
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Position"
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Fill"
+        />
+        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
+          <Button
+            className="center relative"
+            onClick={() => setShowPicker(!showPicker)}
+          >
+            {selectedIds.length > 0 ? (
+              (() => {
+                const shape = getShapeObject(
+                  selectedIds[selectedIds.length - 1]
+                )[0];
+                const fillColor = shape?.fill || "";
+
+                return (
+                  <div className="color-display">
+                    <div
+                      className="color-box"
+                      style={{ backgroundColor: fillColor }}
+                    />
+                    <span>{fillColor}</span>
+                    {showPicker && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "-235px",
+                          top: "0",
+                        }}
+                      >
+                        <SketchPicker
+                          color={fillColor}
+                          onChangeComplete={(color) =>
+                            handleChangeColor(color, shape)
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
+            ) : (
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            )}
+          </Button>
+        </SideBar.Content>
+
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Stroke"
+        />
+        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
+          <Button
+            className="center relative"
+            onClick={() => setShowStrokePicker(!showStrokePicker)}
+          >
+            {selectedIds.length > 0 ? (
+              (() => {
+                const shape = getShapeObject(
+                  selectedIds[selectedIds.length - 1]
+                )[0];
+                const strokeColor = shape?.stroke || "";
+
+                return (
+                  <div className="color-display">
+                    <div
+                      className="color-box"
+                      style={{ backgroundColor: strokeColor }}
+                    />
+                    <span>{strokeColor}</span>
+                    {showStrokePicker && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "-235px",
+                          top: "0",
+                        }}
+                      >
+                        <SketchPicker
+                          color={strokeColor}
+                          onChangeComplete={(color) =>
+                            handleChangeSrokeColor(color, shape)
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
+            ) : (
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            )}
+          </Button>
+          <SideBar.Header
+            style={{
+              color: "gray",
+              marginTop: "15px",
+              marginBottom: "7px",
+              fontSize: "10px",
+            }}
+            content="Weight"
+          />
+          {selectedIds.length > 0 ? (
+            <Input
+              onChange={handleChangeStrokeNum}
+              value={
+                getShapeObject(selectedIds[selectedIds.length - 1])[0]?.strokeWidth
+              }
+            />
+          ) : (
+            <Button className="center relative">
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            </Button>
+          )}
+        </SideBar.Content>
+      </SideBar>
+
+      <Tooltip />
+      <Stage
+        width={window.innerWidth}
+        height={window.innerHeight}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onClick={handleStageClick}
+      >
+        <Layer>
+          {rectangles.map((rect) => (
+            <Rect
+              {...rect}
+              key={`${rect.name} ${rect.id}`}
+              id={`${rect.name} ${rect.id}`}
+              ref={(node) => {
+                if (node) {
+                  rectRefs.current.set(`${rect.name} ${rect.id}`, node);
+                }
+              }}
+              stroke={
+                selectedIds.includes(`${rect.name} ${rect.id}`)
+                  ? "#80D0FF"
+                  : rect.stroke
+              }
+              onDragEnd={handleDragEnd}
+              onTransformEnd={handleTransformEnd}
+              rotation={rect.rotation}
+              draggable={true}
+            />
+          ))}
+
+          {tempShape && mode === "RECT" && (
+            <Rect {...tempShape} ref={drawingShapeRef} draggable={true} />
+          )}
+
+          {ellipses.map((ellipse) => (
+            <Ellipse
+              key={`${ellipse.name} ${ellipse.id}`}
+              id={`${ellipse.name} ${ellipse.id}`}
+              x={ellipse.x}
+              y={ellipse.y}
+              radiusX={ellipse.radiusX}
+              radiusY={ellipse.radiusY}
+              fill={ellipse.fill}
+              stroke={
+                selectedIds.includes(`${ellipse.name} ${ellipse.id}`)
+                  ? "#80D0FF"
+                  : ellipse.stroke
+              }
+              strokeWidth={ellipse.strokeWidth}
+              ref={(node) => {
+                if (node) {
+                  ellipseRefs.current.set(
+                    `${ellipse.name} ${ellipse.id}`,
+                    node
+                  );
+                }
+              }}
+              draggable={true}
+              onDragEnd={handleDragEnd}
+              onTransformEnd={handleTransformEnd}
+              rotation={ellipse.rotation}
+            />
+          ))}
+
+          {tempShape && mode === "ELLIPSE" && (
+            <Ellipse {...tempShape} ref={drawingShapeRef} draggable={false} />
+          )}
+
+          {mode === "SELECT" && tempShape && tempShape.visible && (
+            <Rect
+              x={Math.min(tempShape.x1, tempShape.x2)}
+              y={Math.min(tempShape.y1, tempShape.y2)}
+              width={Math.abs(tempShape.x2 - tempShape.x1)}
+              height={Math.abs(tempShape.y2 - tempShape.y1)}
+              fill="rgba(40, 108, 255, 0.36)"
+              stroke="#80D0FF"
+            />
+          )}
+
+          <Transformer
+            ref={transformerRef}
+            boundBoxFunc={(oldBox, newBox) => {
+              if (newBox.width < 5 || newBox.height < 5) {
+                return oldBox;
+              }
+              return newBox;
+            }}
+          />
+        </Layer>
+      </Stage>
+    </>
   );
 };
 

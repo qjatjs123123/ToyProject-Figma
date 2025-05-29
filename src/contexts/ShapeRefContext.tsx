@@ -15,6 +15,9 @@ import {
   type TempShape,
   type TempShapeAction,
 } from "./shapeReducer";
+import { useAtomValue } from "jotai";
+import { rectangleAtom } from "../Atoms/RectangleState";
+import { EllipseAtom } from "../Atoms/EllipseState";
 
 type Mode = "RECT" | "SELECT" | "ELLIPSE";
 
@@ -31,6 +34,7 @@ interface ShapeRefContextType {
   mode: Mode;
   isCreating: any;
   setIsCreating: any;
+  getShapeObject: any;
 }
 
 const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
@@ -38,14 +42,25 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("ELLIPSE"); // 전역상태?
+  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
   const [isCreating, setIsCreating] = useState(false);
+  const rectangles = useAtomValue(rectangleAtom);
+  const ellipses = useAtomValue(EllipseAtom);
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
   const transformerRef = useRef<Konva.Transformer>(null);
   const drawingShapeRef = useRef(null);
+
+  const getShapeObject = (id: string) => {
+    const type = id.split(" ")[0];
+    const num = id.split(" ")[1];
+
+    if (type === "Rectangle") return rectangles.filter((item) => item.id === Number(num));
+    else if (type === "Ellipse") return ellipses.filter((item) => item.id === Number(num));
+    return null;
+  };
 
   useEffect(() => {
     const transformer = transformerRef.current;
@@ -74,7 +89,6 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
     } else {
       transformerRef.current?.nodes(nodes);
     }
-
   }, [selectedIds, isCreating]);
 
   return (
@@ -91,6 +105,7 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         setIsCreating,
         tempShape,
         tempShapeDispatch,
+        getShapeObject,
         mode,
       }}
     >

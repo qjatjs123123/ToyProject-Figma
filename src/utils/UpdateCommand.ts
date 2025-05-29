@@ -1,34 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class UpdateCommand {
-  private atom : any;
+  private atom: any;
   private setState: any;
-  private shapeId: string;
-  private isCreateing: boolean;
+  private origin: any;
+  private newValue: any;
 
-  constructor(atom: any, shapeId: string ,setAtom: any) {
+  constructor(setAtom: any, origin: any, newValue: any, atom: any) {
     this.atom = atom;
     this.setState = setAtom;
-    this.shapeId = shapeId;
-    this.isCreateing = false;
+    this.origin = origin;
+    this.newValue = newValue;
   }
 
   execute() {
-    this.setState((prevRects) => {
-      const newRects = [...prevRects];
-
-      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === this.shapeId);
-
-      if (index !== -1) {
-
-      } else {
-        this.isCreateing = true;
-        
-      }
-    })
-
+    this.setState((prev) =>
+      prev.map((item) => (item.id === this.newValue.id ? this.newValue : item))
+    );
   }
 
   undo() {
-
+    this.setState((prev) =>
+      prev.map((item) => (item.id === this.origin.id ? this.origin : item))
+    );
   }
 }

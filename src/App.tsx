@@ -11,6 +11,7 @@ import EllipseIcon from "./components/EllipseIcon";
 import Button from "./components/Button";
 import { SketchPicker } from "react-color";
 import { useState } from "react";
+import Input from "./components/Input";
 
 type ShapeName = "Rectangle" | "Ellipse";
 
@@ -75,6 +76,36 @@ const App = () => {
     }
   };
 
+  const handleChangeStrokeNum = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value, 10);
+    const shape = getShapeObject(selectedIds[selectedIds.length - 1])[0];
+
+    if (isNaN(newValue) || newValue <= 4 || newValue >= 51) return;
+
+    let alpha = 0;
+    const value = shape.strokeWidth;
+
+    if (newValue < value) alpha = -1;
+    else alpha = +1;
+
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id
+            ? { ...item, strokeWidth: item.strokeWidth + alpha }
+            : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id
+            ? { ...item, strokeWidth: item.strokeWidth + alpha }
+            : item
+        )
+      );
+    }
+  };
 
   return (
     <>
@@ -183,7 +214,7 @@ const App = () => {
           style={{ fontSize: "12px" }}
           content="Stroke"
         />
-        <SideBar.Content  style={{ paddingLeft: "12px", marginBottom: "10px" }}>
+        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
           <Button
             className="center relative"
             onClick={() => setShowStrokePicker(!showStrokePicker)}
@@ -227,6 +258,29 @@ const App = () => {
               </div>
             )}
           </Button>
+          <SideBar.Header
+            style={{
+              color: "gray",
+              marginTop: "15px",
+              marginBottom: "7px",
+              fontSize: "10px",
+            }}
+            content="Weight"
+          />
+          {selectedIds.length > 0 ? (
+            <Input
+              onChange={handleChangeStrokeNum}
+              value={
+                getShapeObject(selectedIds[selectedIds.length - 1])[0]?.strokeWidth
+              }
+            />
+          ) : (
+            <Button className="center relative">
+              <div style={{ height: "20px" }} className="center">
+                No Selected
+              </div>
+            </Button>
+          )}
         </SideBar.Content>
       </SideBar>
 
@@ -251,7 +305,9 @@ const App = () => {
                 }
               }}
               stroke={
-                selectedIds.includes(`${rect.name} ${rect.id}`) ? "#80D0FF" : rect.stroke
+                selectedIds.includes(`${rect.name} ${rect.id}`)
+                  ? "#80D0FF"
+                  : rect.stroke
               }
               onDragEnd={handleDragEnd}
               onTransformEnd={handleTransformEnd}

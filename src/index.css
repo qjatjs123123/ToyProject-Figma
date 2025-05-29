@@ -117,9 +117,28 @@ body {
   background-color: #f0f0f0; 
 }
 .overflow-y {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .shape-item.primary {
   color: #000;
   background-color: rgb(229, 243, 255);
+}
+.number-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.number-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.number-input::-webkit-inner-spin-button {
+  opacity: 0.6;
 }

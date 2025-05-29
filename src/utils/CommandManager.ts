@@ -20,11 +20,21 @@ export class CommandManager {
       this.pointer++;
     }
 
+    const MAX_HISTORY = 40;
+    if (this.history.length > MAX_HISTORY) {
+      const excess = this.history.length - MAX_HISTORY;
+      this.history.splice(0, excess);
+      this.pointer -= excess;
+      if (this.pointer < -1) this.pointer = -1; 
+    }
   }
 
   static undo() {
     if (this.pointer >= 0) {
-      this.history[this.pointer].slice().reverse().forEach((item) => item.undo());
+      this.history[this.pointer]
+        .slice()
+        .reverse()
+        .forEach((item) => item.undo());
 
       this.pointer--;
     }
@@ -33,7 +43,10 @@ export class CommandManager {
   static redo() {
     if (this.pointer < this.history.length - 1) {
       this.pointer++;
-      this.history[this.pointer].slice().reverse().forEach((item) => item.execute())
+      this.history[this.pointer]
+        .slice()
+        .reverse()
+        .forEach((item) => item.execute());
     }
   }
 

@@ -15,6 +15,7 @@ import type {
 import { DragMoveCommand } from "../utils/MoveCommand";
 import { CommandManager } from "../utils/CommandManager";
 import { useProxy } from "./useProxy";
+import { TransformCommand } from "../utils/TransformCommand";
 interface PointProps {
   x: number;
   y: number;
@@ -175,50 +176,51 @@ export default function useModeHandlers() {
   };
 
   const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
+    if (!isBatching.current) {
+      isBatching.current = true;
+      CommandManager.isBatching = true;
+      CommandManager.init();
+    }
+
     const id = e.target.id();
     const className = e.target.className?.toString() as keyof typeof setterFunc;
 
     if (!className || !(className in setterFunc)) return;
-    const node = e.target;
 
-    setterFunc[className]((prevRects: any) => {
-      const newRects = [...prevRects];
+    const command = new TransformCommand(setterFunc[className], id, e.target);
+    CommandManager.execute(command);
 
-      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
+    batchTimeout.current = setTimeout(() => {
+      isBatching.current = false;
+      CommandManager.isBatching = false;
+      batchTimeout.current = null;
+    }, 0);
 
-      if (index !== -1) {
-        newRects[index] = getNewData(newRects[index], node, className);
-        node.scaleX(1);
-        node.scaleY(1);
-      }
-
-      return newRects;
-    });
   };
 
-  const getNewData = (obj: any, node: any, className: string) => {
-    if (className === "Rect") {
-      return {
-        ...obj,
-        x: node.x(),
-        y: node.y(),
-        width: Math.max(5, node.width() * node.scaleX()),
-        height: Math.max(5, node.height() * node.scaleY()),
-        rotation: node.rotation(),
-      };
-    } else if (className === "Ellipse") {
-      return {
-        ...obj,
-        x: node.x(),
-        y: node.y(),
-        width: Math.max(5, node.width() * node.scaleX()),
-        height: Math.max(5, node.height() * node.scaleY()),
-        radiusX: Math.abs(obj.radiusX * node.scaleX()),
-        radiusY: Math.abs(obj.radiusY * node.scaleY()),
-        rotation: node.rotation(),
-      };
-    }
-  };
+  // const getNewData = (obj: any, node: any, className: string) => {
+  //   if (className === "Rect") {
+  //     return {
+  //       ...obj,
+  //       x: node.x(),
+  //       y: node.y(),
+  //       width: Math.max(5, node.width() * node.scaleX()),
+  //       height: Math.max(5, node.height() * node.scaleY()),
+  //       rotation: node.rotation(),
+  //     };
+  //   } else if (className === "Ellipse") {
+  //     return {
+  //       ...obj,
+  //       x: node.x(),
+  //       y: node.y(),
+  //       width: Math.max(5, node.width() * node.scaleX()),
+  //       height: Math.max(5, node.height() * node.scaleY()),
+  //       radiusX: Math.abs(obj.radiusX * node.scaleX()),
+  //       radiusY: Math.abs(obj.radiusY * node.scaleY()),
+  //       rotation: node.rotation(),
+  //     };
+  //   }
+  // };
 
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
     startPoint.current = null;
@@ -255,9 +257,6 @@ export default function useModeHandlers() {
     }, 10);
   };
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
-    // 상태 업데이트
-    console.log(CommandManager.isBatching, isBatching.current)
-
     if (!isBatching.current) {
       isBatching.current = true;
       CommandManager.isBatching = true;
@@ -281,7 +280,7 @@ export default function useModeHandlers() {
       isBatching.current = false;
       CommandManager.isBatching = false;
       batchTimeout.current = null;
-      console.log(CommandManager.isBatching, isBatching.current)
+      console.log(CommandManager.isBatching, isBatching.current);
     }, 0);
   };
   // const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {

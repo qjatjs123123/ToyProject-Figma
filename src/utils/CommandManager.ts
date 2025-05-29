@@ -2,18 +2,31 @@
 export class CommandManager {
   private static history: any[] = [];
   private static pointer: number = -1;
+  static isBatching: boolean = false;
+
+  static init() {
+    this.history.push([]);
+    this.pointer++;
+  }
 
   static execute(command: { execute: () => void; undo: () => void }) {
     command.execute();
+
     this.history = this.history.slice(0, this.pointer + 1);
-    this.history.push(command);
-    this.pointer++;
+    if (this.isBatching) {
+      this.history[this.pointer].push(command);
+    } else {
+      this.history.push([command]);
+      this.pointer++;
+    }
+
     console.log(this.history);
   }
 
   static undo() {
     if (this.pointer >= 0) {
-      this.history[this.pointer].undo();
+      this.history[this.pointer].slice().reverse().forEach((item) => item.undo());
+
       this.pointer--;
     }
   }

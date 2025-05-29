@@ -14,6 +14,7 @@ import type {
 } from "../contexts/shapeReducer";
 import { DragMoveCommand } from "../utils/MoveCommand";
 import { CommandManager } from "../utils/CommandManager";
+import { useProxy } from "./useProxy";
 interface PointProps {
   x: number;
   y: number;
@@ -84,12 +85,15 @@ export default function useModeHandlers() {
   const shapeAll = useAtomValue(shapeAllData);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  // const [rectangles, setRectangles] = useProxy(useAtom(rectangleAtom));
+  // const [ellipses, setEllipses] = useProxy(useAtom(EllipseAtom));
   const isDragging = useRef(false);
+  const isBatching = useRef(false);
   const setterFunc = {
     Rect: setRectangles,
     Ellipse: setEllipses,
   };
-
+  const batchTimeout = useRef(null);
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
     if (isDragging.current) {
       return;
@@ -250,23 +254,36 @@ export default function useModeHandlers() {
       isDragging.current = false;
     }, 10);
   };
-
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
+    // 상태 업데이트
+    console.log(CommandManager.isBatching, isBatching.current)
+
+    if (!isBatching.current) {
+      isBatching.current = true;
+      CommandManager.isBatching = true;
+      CommandManager.init();
+    }
+
     const id = e.target.id();
     const className = e.target.className?.toString() as keyof typeof setterFunc;
-
     if (!className || !(className in setterFunc)) return;
 
     const newPos = { x: e.target.x(), y: e.target.y() };
 
-    const command = new DragMoveCommand(
-      setterFunc[className],
-      id,
-      newPos
-    );
+    const command = new DragMoveCommand(setterFunc[className], id, newPos);
     CommandManager.execute(command);
-  };
 
+    if (batchTimeout.current) {
+      clearTimeout(batchTimeout.current);
+    }
+
+    batchTimeout.current = setTimeout(() => {
+      isBatching.current = false;
+      CommandManager.isBatching = false;
+      batchTimeout.current = null;
+      console.log(CommandManager.isBatching, isBatching.current)
+    }, 0);
+  };
   // const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
   //   const id = e.target.id();
   //   const className = e.target.className?.toString() as keyof typeof setterFunc;

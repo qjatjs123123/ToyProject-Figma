@@ -13,6 +13,7 @@ import { SketchPicker } from "react-color";
 import { useEffect, useState } from "react";
 import Input from "./components/Input";
 import { CommandManager } from "./utils/CommandManager";
+import { useProxy } from "./hooks/useProxy";
 
 type ShapeName = "Rectangle" | "Ellipse";
 
@@ -22,8 +23,8 @@ const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
 };
 
 const App = () => {
-  const [rectangles, setRectangles] = useAtom(rectangleAtom);
-  const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  const [rectangles, setRectangles] = useProxy(useAtom(rectangleAtom));
+  const [ellipses, setEllipses] = useProxy(useAtom(EllipseAtom));
   const [showPicker, setShowPicker] = useState(false);
   const [showStrokePicker, setShowStrokePicker] = useState(false);
   const {

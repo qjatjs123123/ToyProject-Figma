@@ -67,6 +67,10 @@ const App = () => {
       if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         CommandManager.undo();
+      } 
+      if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+        e.preventDefault();
+        CommandManager.redo();
       }
     };
 

@@ -20,7 +20,6 @@ export class CommandManager {
       this.pointer++;
     }
 
-    console.log(this.history);
   }
 
   static undo() {
@@ -34,7 +33,7 @@ export class CommandManager {
   static redo() {
     if (this.pointer < this.history.length - 1) {
       this.pointer++;
-      this.history[this.pointer].execute();
+      this.history[this.pointer].slice().reverse().forEach((item) => item.execute())
     }
   }
 

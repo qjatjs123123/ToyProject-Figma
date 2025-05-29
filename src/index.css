@@ -94,6 +94,10 @@ body {
   padding-bottom: 0px;
 }
 
+.relative {
+  position: relative;
+}
+
 .sidebarBase{
   height: 1px;
   width: 100%;

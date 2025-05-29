@@ -10,6 +10,7 @@ import RectIcon from "./components/RectIcon";
 import EllipseIcon from "./components/EllipseIcon";
 import Button from "./components/Button";
 import { SketchPicker } from "react-color";
+import { useState } from "react";
 
 type ShapeName = "Rectangle" | "Ellipse";
 
@@ -21,6 +22,7 @@ const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
   const ellipses = useAtomValue(EllipseAtom);
+  const [showPicker, setShowPicker] = useState(false);
   const {
     ellipseRefs,
     rectRefs,
@@ -97,7 +99,7 @@ const App = () => {
           content="Fill"
         />
         <SideBar.Content style={{paddingLeft:'12px', marginBottom:'10px'}}>
-          <Button className="center">
+          <Button className="center relative" onClick={() => setShowPicker(!showPicker)}>
             {selectedIds.length > 0 &&
               (() => {
                 const shape = getShapeObject(
@@ -115,7 +117,9 @@ const App = () => {
                   </div>
                 );
               })()}
+              {showPicker && <div style={{position:'absolute', left:'-235px', top:'0'}}><SketchPicker /></div>}
           </Button>
+          
         </SideBar.Content>
 
         <SideBar.SpaceBar />

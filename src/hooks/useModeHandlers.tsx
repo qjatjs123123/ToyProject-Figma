@@ -14,12 +14,9 @@ import type {
 } from "../contexts/shapeReducer";
 import { DragMoveCommand } from "../utils/MoveCommand";
 import { CommandManager } from "../utils/CommandManager";
-import { useProxy } from "./useProxy";
+// import { useProxy } from "./useProxy";
 import { TransformCommand } from "../utils/TransformCommand";
-interface PointProps {
-  x: number;
-  y: number;
-}
+
 interface ElementProps {
   x: number;
   y: number;
@@ -82,7 +79,7 @@ export default function useModeHandlers() {
     setIsCreating,
   } = useShapeRefState();
 
-  const startPoint = useRef<PointProps>({ x: 0, y: 0 });
+  const startPoint = useRef<any>({ x: 0, y: 0 });
   const shapeAll = useAtomValue(shapeAllData);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
@@ -94,7 +91,7 @@ export default function useModeHandlers() {
     Rect: setRectangles,
     Ellipse: setEllipses,
   };
-  const batchTimeout = useRef(null);
+  const batchTimeout = useRef<number | null>(null);
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
     if (isDragging.current) {
       return;
@@ -235,7 +232,7 @@ export default function useModeHandlers() {
       return;
     setIsCreating(false);
 
-    if (mode === "RECT" && tempShape.name === "Rectangle")
+    if (mode === "RECT" && (tempShape as { name: string }).name === "Rectangle")
       setRectangles([...rectangles, tempShape as RectShape]);
     else if (mode === "ELLIPSE")
       setEllipses([...ellipses, tempShape as EllipseShape]);

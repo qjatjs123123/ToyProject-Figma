@@ -5,6 +5,7 @@ export class CommandManager {
   static isBatching: boolean = false;
 
   static init() {
+    this.history = this.history.slice(0, this.pointer + 1);
     this.history.push([]);
     this.pointer++;
   }
@@ -12,7 +13,8 @@ export class CommandManager {
   static execute(command: { execute: () => void; undo: () => void }) {
     command.execute();
 
-    this.history = this.history.slice(0, this.pointer + 1);
+    
+    console.log(this.isBatching, this.pointer);
     if (this.isBatching) {
       this.history[this.pointer].push(command);
     } else {
@@ -27,6 +29,8 @@ export class CommandManager {
       this.pointer -= excess;
       if (this.pointer < -1) this.pointer = -1; 
     }
+
+    console.log(this.history);
   }
 
   static undo() {
@@ -38,6 +42,7 @@ export class CommandManager {
 
       this.pointer--;
     }
+    console.log(this.pointer);
   }
 
   static redo() {

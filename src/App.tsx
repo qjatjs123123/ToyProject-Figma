@@ -26,6 +26,7 @@ const App = () => {
     drawingShapeRef,
     selectedIds,
     tempShape,
+    setSelectedIds,
     mode,
   } = useShapeRefState();
   const {
@@ -52,6 +53,7 @@ const App = () => {
           {[...rectangles, ...ellipses].map(({ name, id }) => (
             <div
               key={id}
+              onClick={() => setSelectedIds([...selectedIds, `${name} ${id}`])}
               className={`shape-item${
                 selectedIds.includes(`${name} ${id}`) ? " primary" : ""
               }`}

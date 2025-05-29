@@ -79,6 +79,7 @@ export default function useModeHandlers() {
     mode,
     isCreating,
     setIsCreating,
+    drawingShapeRef,
   } = useShapeRefState();
 
   const startPoint = useRef<any>({ x: 0, y: 0 });
@@ -237,16 +238,22 @@ export default function useModeHandlers() {
       mode === "RECT" &&
       (tempShape as { name: string }).name === "Rectangle"
     ) {
-      const command = new CreateCommand([...rectangles], setRectangles, [
-        ...rectangles,
-        tempShape as RectShape,
-      ]);
+      const command = new CreateCommand(
+        [...rectangles],
+        setRectangles,
+        [...rectangles, tempShape as RectShape],
+        drawingShapeRef,
+        setSelectedIds
+      );
       CommandManager.execute(command);
     } else if (mode === "ELLIPSE") {
-      const command = new CreateCommand([...ellipses], setEllipses, [
-        ...ellipses,
-        tempShape as EllipseShape,
-      ]);
+      const command = new CreateCommand(
+        [...ellipses],
+        setEllipses,
+        [...ellipses, tempShape as EllipseShape],
+        drawingShapeRef,
+        setSelectedIds
+      );
       CommandManager.execute(command);
     }
 

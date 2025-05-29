@@ -8,6 +8,8 @@ import Tooltip from "./components/ToolTip";
 import SideBar from "./components/SideBar";
 import RectIcon from "./components/RectIcon";
 import EllipseIcon from "./components/EllipseIcon";
+import Button from "./components/Button";
+import { SketchPicker } from "react-color";
 
 type ShapeName = "Rectangle" | "Ellipse";
 
@@ -27,6 +29,7 @@ const App = () => {
     selectedIds,
     tempShape,
     setSelectedIds,
+    getShapeObject,
     mode,
   } = useShapeRefState();
   const {
@@ -45,14 +48,14 @@ const App = () => {
         <SideBar.SpaceBar />
         <SideBar.Header
           content="Shapes"
-          type="small"
+          style={{ marginTop: "10px", marginBottom: "10px" }}
           className="paddingSideBar paddingSideBarMedium"
         />
         <SideBar.SpaceBar />
         <SideBar.Content className="overflow-y">
           {[...rectangles, ...ellipses].map(({ name, id }) => (
             <div
-              key={id}
+              key={`${name} ${id}`}
               onClick={() => setSelectedIds([...selectedIds, `${name} ${id}`])}
               className={`shape-item${
                 selectedIds.includes(`${name} ${id}`) ? " primary" : ""
@@ -66,6 +69,58 @@ const App = () => {
           ))}
         </SideBar.Content>
       </SideBar>
+
+      <SideBar className="rightSideBarLayout flex_col">
+        <SideBar.Header
+          className="paddingSideBar"
+          content={<Button className="btnPad">Design</Button>}
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          content={
+            selectedIds.length === 1
+              ? selectedIds[0].split(" ")[0]
+              : `${selectedIds.length} selected`
+          }
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Position"
+        />
+        <SideBar.SpaceBar />
+        <SideBar.Header
+          className="paddingSideBar"
+          style={{ fontSize: "12px" }}
+          content="Fill"
+        />
+        <SideBar.Content style={{paddingLeft:'12px', marginBottom:'10px'}}>
+          <Button className="center">
+            {selectedIds.length > 0 &&
+              (() => {
+                const shape = getShapeObject(
+                  selectedIds[selectedIds.length - 1]
+                )[0];
+                const fillColor = shape?.fill || "";
+
+                return (
+                  <div className="color-display">
+                    <div
+                      className="color-box"
+                      style={{ backgroundColor: fillColor }}
+                    />
+                    <span>{fillColor}</span>
+                  </div>
+                );
+              })()}
+          </Button>
+        </SideBar.Content>
+
+        <SideBar.SpaceBar />
+      </SideBar>
+
       <Tooltip />
       <Stage
         width={window.innerWidth}

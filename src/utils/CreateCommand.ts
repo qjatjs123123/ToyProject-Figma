@@ -1,13 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class CreateCommand {
-  constructor(private stateRef, private newShape) {}
+  private atom: any;
+  private setState: any;
+  private newAtom: any;
+
+  constructor(atom: any, setAtom: any, newAtom: any) {
+    this.atom = atom;
+    this.setState = setAtom;
+    this.newAtom = newAtom;
+  }
 
   execute() {
-    this.stateRef.current = [...this.stateRef.current, this.newShape];
+    this.setState(this.newAtom);
   }
 
   undo() {
-    this.stateRef.current = this.stateRef.current.filter(
-      (shape) => shape.id !== this.newShape.id
-    );
+    this.setState(this.atom);
   }
 }

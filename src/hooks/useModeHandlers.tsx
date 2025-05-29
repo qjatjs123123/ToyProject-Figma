@@ -16,6 +16,8 @@ import { DragMoveCommand } from "../utils/MoveCommand";
 import { CommandManager } from "../utils/CommandManager";
 // import { useProxy } from "./useProxy";
 import { TransformCommand } from "../utils/TransformCommand";
+import { useProxy } from "./useProxy";
+import { CreateCommand } from "../utils/CreateCommand";
 
 interface ElementProps {
   x: number;
@@ -83,8 +85,8 @@ export default function useModeHandlers() {
   const shapeAll = useAtomValue(shapeAllData);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
-  // const [rectangles, setRectangles] = useProxy(useAtom(rectangleAtom));
-  // const [ellipses, setEllipses] = useProxy(useAtom(EllipseAtom));
+  // const [rectanglesP, setRectanglesP] = useProxy(useAtom(rectangleAtom));
+  // const [ellipsesP, setEllipsesP] = useProxy(useAtom(EllipseAtom));
   const isDragging = useRef(false);
   const isBatching = useRef(false);
   const setterFunc = {
@@ -192,7 +194,6 @@ export default function useModeHandlers() {
       CommandManager.isBatching = false;
       batchTimeout.current = null;
     }, 0);
-
   };
 
   // const getNewData = (obj: any, node: any, className: string) => {
@@ -232,10 +233,22 @@ export default function useModeHandlers() {
       return;
     setIsCreating(false);
 
-    if (mode === "RECT" && (tempShape as { name: string }).name === "Rectangle")
-      setRectangles([...rectangles, tempShape as RectShape]);
-    else if (mode === "ELLIPSE")
-      setEllipses([...ellipses, tempShape as EllipseShape]);
+    if (
+      mode === "RECT" &&
+      (tempShape as { name: string }).name === "Rectangle"
+    ) {
+      const command = new CreateCommand([...rectangles], setRectangles, [
+        ...rectangles,
+        tempShape as RectShape,
+      ]);
+      CommandManager.execute(command);
+    } else if (mode === "ELLIPSE") {
+      const command = new CreateCommand([...ellipses], setEllipses, [
+        ...ellipses,
+        tempShape as EllipseShape,
+      ]);
+      CommandManager.execute(command);
+    }
 
     setMode("SELECT");
     tempShapeDispatch({

@@ -10,8 +10,9 @@ import RectIcon from "./components/RectIcon";
 import EllipseIcon from "./components/EllipseIcon";
 import Button from "./components/Button";
 import { SketchPicker } from "react-color";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "./components/Input";
+import { CommandManager } from "./utils/CommandManager";
 
 type ShapeName = "Rectangle" | "Ellipse";
 
@@ -59,6 +60,18 @@ const App = () => {
       );
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+        e.preventDefault();
+        CommandManager.undo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleChangeSrokeColor = (selectedColor, shape) => {
     if (shape.name === "Ellipse") {
@@ -271,7 +284,8 @@ const App = () => {
             <Input
               onChange={handleChangeStrokeNum}
               value={
-                getShapeObject(selectedIds[selectedIds.length - 1])[0]?.strokeWidth
+                getShapeObject(selectedIds[selectedIds.length - 1])[0]
+                  ?.strokeWidth
               }
             />
           ) : (

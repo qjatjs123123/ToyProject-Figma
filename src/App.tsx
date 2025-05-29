@@ -6,6 +6,15 @@ import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
 import Tooltip from "./components/ToolTip";
 import SideBar from "./components/SideBar";
+import RectIcon from "./components/RectIcon";
+import EllipseIcon from "./components/EllipseIcon";
+
+type ShapeName = "Rectangle" | "Ellipse";
+
+const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
+  Rectangle: (color: string) => <RectIcon color={color} />,
+  Ellipse: (color: string) => <EllipseIcon color={color} />,
+};
 
 const App = () => {
   const rectangles = useAtomValue(rectangleAtom);
@@ -33,11 +42,27 @@ const App = () => {
       <SideBar className="leftSideBarLayout flex_col">
         <SideBar.Header content="제목1" type="big" className="paddingSideBar" />
         <SideBar.SpaceBar />
-        <SideBar.Header content="Shapes" type="small" className="paddingSideBar paddingSideBarMedium" />
+        <SideBar.Header
+          content="Shapes"
+          type="small"
+          className="paddingSideBar paddingSideBarMedium"
+        />
         <SideBar.SpaceBar />
-        <SideBar.Content >
-          {[...rectangles, ...ellipses].map(({name, id}) => <div>{name} {id}</div>)}
-        </SideBar.Content> 
+        <SideBar.Content className="overflow-y">
+          {[...rectangles, ...ellipses].map(({ name, id }) => (
+            <div
+              key={id}
+              className={`shape-item${
+                selectedIds.includes(`${name} ${id}`) ? " primary" : ""
+              }`}
+            >
+              {shapeItemMap[name as ShapeName]("black")}
+              <span>
+                {name} {id}
+              </span>
+            </div>
+          ))}
+        </SideBar.Content>
       </SideBar>
       <Tooltip />
       <Stage

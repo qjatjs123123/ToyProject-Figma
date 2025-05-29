@@ -25,7 +25,7 @@ body {
 }
 .primary {
   background-color: rgb(11, 153, 255); /* Tailwind의 bg-blue-600 */
-  color: white !important;             /* text-white */
+  color: white;             /* text-white */
   transition: background-color 0.2s ease;
 }
 
@@ -57,4 +57,24 @@ body {
   height: 1px;
   width: 100%;
   background-color: #ddd;
+}
+.shape-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;              
+  padding: 8px;         
+  border-radius: 4px;    
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.shape-item:hover {
+  background-color: #f0f0f0; 
+}
+.overflow-y {
+  overflow-y: scroll;
+}
+.shape-item.primary {
+  color: #000;
+  background-color: rgb(229, 243, 255);
 }

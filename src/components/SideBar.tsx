@@ -36,8 +36,8 @@ const SideBar: SideBarComponent = ({ className = "", children }) => {
   return <div className={className}>{children}</div>;
 };
 
-const Content: FC<any> = ({ children }) => {
-  return <div>{children}</div>;
+const Content: FC<any> = ({ children, className = "" }) => {
+  return <div className={className}>{children}</div>;
 };
 
 SideBar.Header = Header;

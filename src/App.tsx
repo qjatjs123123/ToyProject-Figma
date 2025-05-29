@@ -1,6 +1,6 @@
 import { Stage, Layer, Transformer, Rect, Ellipse } from "react-konva";
 import useModeHandlers from "./hooks/useModeHandlers";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { rectangleAtom } from "./Atoms/RectangleState";
 import { useShapeRefState } from "./contexts/ShapeRefContext";
 import { EllipseAtom } from "./Atoms/EllipseState";
@@ -20,8 +20,8 @@ const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
 };
 
 const App = () => {
-  const rectangles = useAtomValue(rectangleAtom);
-  const ellipses = useAtomValue(EllipseAtom);
+  const [rectangles, setRectangles] = useAtom(rectangleAtom);
+  const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const [showPicker, setShowPicker] = useState(false);
   const {
     ellipseRefs,
@@ -42,6 +42,21 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
   } = useModeHandlers();
+  const handleChangeColor = (selectedColor, shape) => {
+    if (shape.name === "Ellipse") {
+      setEllipses(
+        ellipses.map((item) =>
+          item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
+        )
+      );
+    } else if (shape.name === "Rectangle") {
+      setRectangles(
+        rectangles.map((item) =>
+          item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
+        )
+      );
+    }
+  };
 
   return (
     <>
@@ -98,8 +113,11 @@ const App = () => {
           style={{ fontSize: "12px" }}
           content="Fill"
         />
-        <SideBar.Content style={{paddingLeft:'12px', marginBottom:'10px'}}>
-          <Button className="center relative" onClick={() => setShowPicker(!showPicker)}>
+        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
+          <Button
+            className="center relative"
+            onClick={() => setShowPicker(!showPicker)}
+          >
             {selectedIds.length > 0 &&
               (() => {
                 const shape = getShapeObject(
@@ -114,12 +132,26 @@ const App = () => {
                       style={{ backgroundColor: fillColor }}
                     />
                     <span>{fillColor}</span>
+                    {showPicker && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "-235px",
+                          top: "0",
+                        }}
+                      >
+                        <SketchPicker
+                          color={fillColor}
+                          onChangeComplete={(color) =>
+                            handleChangeColor(color, shape)
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })()}
-              {showPicker && <div style={{position:'absolute', left:'-235px', top:'0'}}><SketchPicker /></div>}
           </Button>
-          
         </SideBar.Content>
 
         <SideBar.SpaceBar />

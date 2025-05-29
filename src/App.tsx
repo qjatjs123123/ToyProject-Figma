@@ -59,7 +59,6 @@ const App = () => {
           ellipses
         );
         CommandManager.execute(command);
-
       } else if (shape.name === "Rectangle") {
         const command = new UpdateCommand(
           setRectangles,
@@ -74,23 +73,6 @@ const App = () => {
       CommandManager.isBatching = false;
     }, 0);
   };
-
-  // const handleChangeColor = (selectedColor, shape) => {
-
-  //   if (shape.name === "Ellipse") {
-  //     setEllipses(
-  //       ellipses.map((item) =>
-  //         item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
-  //       )
-  //     );
-  //   } else if (shape.name === "Rectangle") {
-  //     setRectangles(
-  //       rectangles.map((item) =>
-  //         item.id === shape.id ? { ...item, fill: selectedColor.hex } : item
-  //       )
-  //     );
-  //   }
-  // };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -109,19 +91,31 @@ const App = () => {
   }, []);
 
   const handleChangeSrokeColor = (selectedColor, shape) => {
-    if (shape.name === "Ellipse") {
-      setEllipses(
-        ellipses.map((item) =>
-          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
-        )
-      );
-    } else if (shape.name === "Rectangle") {
-      setRectangles(
-        rectangles.map((item) =>
-          item.id === shape.id ? { ...item, stroke: selectedColor.hex } : item
-        )
-      );
-    }
+    CommandManager.init();
+    CommandManager.isBatching = true;
+    selectedIds.forEach((id: string) => {
+      const shape = getShapeObject(id)[0];
+      if (shape.name === "Ellipse") {
+        const command = new UpdateCommand(
+          setEllipses,
+          { ...shape },
+          { ...shape, stroke: selectedColor.hex },
+          ellipses
+        );
+        CommandManager.execute(command);
+      } else if (shape.name === "Rectangle") {
+        const command = new UpdateCommand(
+          setRectangles,
+          { ...shape },
+          { ...shape, stroke: selectedColor.hex },
+          rectangles
+        );
+        CommandManager.execute(command);
+      }
+    });
+    setTimeout(() => {
+      CommandManager.isBatching = false;
+    }, 0);
   };
 
   const handleChangeStrokeNum = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,23 +130,31 @@ const App = () => {
     if (newValue < value) alpha = -1;
     else alpha = +1;
 
-    if (shape.name === "Ellipse") {
-      setEllipses(
-        ellipses.map((item) =>
-          item.id === shape.id
-            ? { ...item, strokeWidth: item.strokeWidth + alpha }
-            : item
-        )
-      );
-    } else if (shape.name === "Rectangle") {
-      setRectangles(
-        rectangles.map((item) =>
-          item.id === shape.id
-            ? { ...item, strokeWidth: item.strokeWidth + alpha }
-            : item
-        )
-      );
-    }
+    CommandManager.init();
+    CommandManager.isBatching = true;
+    selectedIds.forEach((id: string) => {
+      const shape = getShapeObject(id)[0];
+      if (shape.name === "Ellipse") {
+        const command = new UpdateCommand(
+          setEllipses,
+          { ...shape },
+          { ...shape, strokeWidth: shape.strokeWidth + alpha },
+          ellipses
+        );
+        CommandManager.execute(command);
+      } else if (shape.name === "Rectangle") {
+        const command = new UpdateCommand(
+          setRectangles,
+          { ...shape },
+          { ...shape, strokeWidth: shape.strokeWidth + alpha },
+          rectangles
+        );
+        CommandManager.execute(command);
+      }
+    });
+    setTimeout(() => {
+      CommandManager.isBatching = false;
+    }, 0);
   };
 
   return (

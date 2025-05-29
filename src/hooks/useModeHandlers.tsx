@@ -12,10 +12,13 @@ import type {
   RectShape,
   SelectionBox,
 } from "../contexts/shapeReducer";
-interface PointProps {
-  x: number;
-  y: number;
-}
+import { DragMoveCommand } from "../utils/MoveCommand";
+import { CommandManager } from "../utils/CommandManager";
+// import { useProxy } from "./useProxy";
+import { TransformCommand } from "../utils/TransformCommand";
+import { useProxy } from "./useProxy";
+import { CreateCommand } from "../utils/CreateCommand";
+
 interface ElementProps {
   x: number;
   y: number;
@@ -62,9 +65,9 @@ const getClientRect = (element: ElementProps) => {
 };
 
 const mappingTable = {
-  RECT : "Rectangle",
-  ELLIPSE : 'Ellipse'
-}
+  RECT: "Rectangle",
+  ELLIPSE: "Ellipse",
+};
 
 export default function useModeHandlers() {
   const {
@@ -75,30 +78,32 @@ export default function useModeHandlers() {
     tempShapeDispatch,
     mode,
     isCreating,
-    setIsCreating
+    setIsCreating,
+    drawingShapeRef,
   } = useShapeRefState();
-  
-  const startPoint = useRef<PointProps>({ x: 0, y: 0 });
-  const shapeAll = useAtomValue(shapeAllData); 
+
+  const startPoint = useRef<any>({ x: 0, y: 0 });
+  const shapeAll = useAtomValue(shapeAllData);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
+  // const [rectanglesP, setRectanglesP] = useProxy(useAtom(rectangleAtom));
+  // const [ellipsesP, setEllipsesP] = useProxy(useAtom(EllipseAtom));
   const isDragging = useRef(false);
+  const isBatching = useRef(false);
   const setterFunc = {
     Rect: setRectangles,
     Ellipse: setEllipses,
   };
-
+  const batchTimeout = useRef<number | null>(null);
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
-
     if (isDragging.current) {
       return;
     }
-    
+
     if (e.target === e.target.getStage()) {
       setSelectedIds([]);
       return;
     }
-    
 
     const clickedId = e.target.id();
 
@@ -112,14 +117,13 @@ export default function useModeHandlers() {
     } else if (metaPressed && !isSelected) {
       setSelectedIds([...selectedIds, clickedId]);
     }
-
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
-    setIsCreating(true)
+    setIsCreating(true);
     startPoint.current = pos;
 
     tempShapeDispatch({
@@ -140,7 +144,7 @@ export default function useModeHandlers() {
       },
     });
 
-    if (mode !== "SELECT" ) 
+    if (mode !== "SELECT")
       setSelectedIds([`${mappingTable[mode]} ${shapeMaxID(mode)}`]);
   };
 
@@ -153,7 +157,7 @@ export default function useModeHandlers() {
     if (!pos) return;
 
     if (startPoint.current) isDragging.current = true;
-    
+
     tempShapeDispatch({
       type: mode,
       data: {
@@ -172,103 +176,149 @@ export default function useModeHandlers() {
   };
 
   const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
+    if (!isBatching.current) {
+      isBatching.current = true;
+      CommandManager.isBatching = true;
+      CommandManager.init();
+    }
+
     const id = e.target.id();
     const className = e.target.className?.toString() as keyof typeof setterFunc;
 
     if (!className || !(className in setterFunc)) return;
-    const node = e.target;
-    
-    setterFunc[className]((prevRects: any) => {
-      const newRects = [...prevRects];
 
-      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
-      
-      if (index !== -1) {
-        
-        newRects[index] = getNewData(newRects[index], node, className);
-        node.scaleX(1);
-        node.scaleY(1);
-      }
+    const command = new TransformCommand(setterFunc[className], id, e.target);
+    CommandManager.execute(command);
 
-      return newRects;
-    });
+    batchTimeout.current = setTimeout(() => {
+      isBatching.current = false;
+      CommandManager.isBatching = false;
+      batchTimeout.current = null;
+    }, 0);
   };
 
-  const getNewData = (obj: any, node: any, className: string) => {
-    if (className === "Rect") {
-      return {
-        ...obj,
-        x: node.x(),
-        y: node.y(),
-        width: Math.max(5, node.width() * node.scaleX()),
-        height: Math.max(5, node.height() * node.scaleY()),
-        rotation: node.rotation(),
-      };
-    } else if (className === "Ellipse") {
-      return {
-        ...obj,
-        x: node.x(),
-        y: node.y(),
-        width: Math.max(5, node.width() * node.scaleX()),
-        height: Math.max(5, node.height() * node.scaleY()),
-        radiusX: Math.abs(obj.radiusX * node.scaleX()),
-        radiusY: Math.abs(obj.radiusY * node.scaleY()),
-        rotation: node.rotation(),
-      };
-    }
-  };
+  // const getNewData = (obj: any, node: any, className: string) => {
+  //   if (className === "Rect") {
+  //     return {
+  //       ...obj,
+  //       x: node.x(),
+  //       y: node.y(),
+  //       width: Math.max(5, node.width() * node.scaleX()),
+  //       height: Math.max(5, node.height() * node.scaleY()),
+  //       rotation: node.rotation(),
+  //     };
+  //   } else if (className === "Ellipse") {
+  //     return {
+  //       ...obj,
+  //       x: node.x(),
+  //       y: node.y(),
+  //       width: Math.max(5, node.width() * node.scaleX()),
+  //       height: Math.max(5, node.height() * node.scaleY()),
+  //       radiusX: Math.abs(obj.radiusX * node.scaleX()),
+  //       radiusY: Math.abs(obj.radiusY * node.scaleY()),
+  //       rotation: node.rotation(),
+  //     };
+  //   }
+  // };
 
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
     startPoint.current = null;
     if (!isCreating) {
       return;
     }
-    if (tempShape && ("width" in tempShape) && (tempShape.height < 5 || tempShape.width < 5)) return;
+    if (
+      tempShape &&
+      "width" in tempShape &&
+      (tempShape.height < 5 || tempShape.width < 5)
+    )
+      return;
     setIsCreating(false);
 
-    if (mode === "RECT" && tempShape.name === 'Rectangle') setRectangles([...rectangles, tempShape as RectShape]);
-    else if (mode === "ELLIPSE")
-      setEllipses([...ellipses, tempShape as EllipseShape]);
+    if (
+      mode === "RECT" &&
+      (tempShape as { name: string }).name === "Rectangle"
+    ) {
+      const command = new CreateCommand(
+        [...rectangles],
+        setRectangles,
+        [...rectangles, tempShape as RectShape],
+        drawingShapeRef,
+        setSelectedIds
+      );
+      CommandManager.execute(command);
+    } else if (mode === "ELLIPSE") {
+      const command = new CreateCommand(
+        [...ellipses],
+        setEllipses,
+        [...ellipses, tempShape as EllipseShape],
+        drawingShapeRef,
+        setSelectedIds
+      );
+      CommandManager.execute(command);
+    }
 
-    
     setMode("SELECT");
     tempShapeDispatch({
-        type: "INIT",
-        data: null as any,
-      });
+      type: "INIT",
+      data: null as any,
+    });
     selectShapesByDrageInit(e);
   };
 
   const selectShapesByDrageInit = (e: KonvaEventObject<MouseEvent>) => {
-
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
 
     setTimeout(() => {
-
       isDragging.current = false;
     }, 10);
   };
-
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
+    if (!isBatching.current) {
+      isBatching.current = true;
+      CommandManager.isBatching = true;
+      CommandManager.init();
+    }
+
     const id = e.target.id();
     const className = e.target.className?.toString() as keyof typeof setterFunc;
-
     if (!className || !(className in setterFunc)) return;
 
-    setterFunc[className]((prevRects: any) => {
-      const newRects = [...prevRects];
-      const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
-      if (index !== -1) {
-        newRects[index] = {
-          ...newRects[index],
-          x: e.target.x(),
-          y: e.target.y(),
-        };
-      }
-      return newRects;
-    });
+    const newPos = { x: e.target.x(), y: e.target.y() };
+
+    const command = new DragMoveCommand(setterFunc[className], id, newPos);
+    CommandManager.execute(command);
+
+    if (batchTimeout.current) {
+      clearTimeout(batchTimeout.current);
+    }
+
+    batchTimeout.current = setTimeout(() => {
+      isBatching.current = false;
+      CommandManager.isBatching = false;
+      batchTimeout.current = null;
+      console.log(CommandManager.isBatching, isBatching.current);
+    }, 0);
   };
+  // const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
+  //   const id = e.target.id();
+  //   const className = e.target.className?.toString() as keyof typeof setterFunc;
+
+  //   if (!className || !(className in setterFunc)) return;
+
+  //   setterFunc[className]((prevRects: any) => {
+  //     const newRects = [...prevRects];
+  //     const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
+  //     if (index !== -1) {
+  //       newRects[index] = {
+  //         ...newRects[index],
+  //         x: e.target.x(),
+  //         y: e.target.y(),
+  //       };
+  //     }
+  //     return newRects;
+  //   });
+  // };
 
   const handleSelectShapesByDrag = () => {
     if (mode !== "SELECT") return;

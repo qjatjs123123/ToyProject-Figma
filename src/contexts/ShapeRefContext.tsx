@@ -62,12 +62,13 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
     return null;
   };
 
+
   useEffect(() => {
     const transformer = transformerRef.current;
 
     if (!transformer) return;
 
-    if (selectedIds.length === 0) {
+    if (selectedIds.length === 0 ) {
       transformer.nodes([]);
       return;
     }
@@ -84,11 +85,13 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
       if (data) nodes.push(data);
     });
 
+
     if (isCreating && drawingShapeRef.current) {
       transformerRef.current?.nodes([drawingShapeRef.current]);
     } else {
       transformerRef.current?.nodes(nodes);
     }
+
   }, [selectedIds, isCreating]);
 
   return (

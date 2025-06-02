@@ -17,10 +17,18 @@ export interface moveParams<T> {
   currentPoint: Point;
   setter: (data: T) => void;
 }
+
+export interface upParams<T> {
+  origin: T | null;
+  shapes: any;
+  setter: (data: any) => void;
+}
+
 export interface Shape<T> {
   down(params: DownParams<T>): void;
   move(params: moveParams<T>): void;
-  up(): void;
+  up(params: upParams<T>): void;
   dragEnd() : void;
   transformEnd() : void;
+  
 }

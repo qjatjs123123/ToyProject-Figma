@@ -1,5 +1,5 @@
 import type { Rect } from "../../type/Shape";
-import type { DownParams, moveParams, Shape } from "./Shape.interface";
+import type { DownParams, moveParams, Shape, upParams } from "./Shape.interface";
 
 
 export class RectangleStrategy implements Shape<Rect> {
@@ -26,7 +26,7 @@ export class RectangleStrategy implements Shape<Rect> {
     const { origin, startPoint, currentPoint, setter } = params;
 
     const rectData = {
-      ...origin,
+      ...origin!,
       x: Math.min(startPoint.x, currentPoint.x),
       y: Math.min(startPoint.y, currentPoint.y),
       width: Math.abs(currentPoint.x - startPoint.x),
@@ -35,8 +35,10 @@ export class RectangleStrategy implements Shape<Rect> {
 
     setter(rectData);
   }
-  up(): void {
-    throw new Error("Method not implemented.");
+  up(params: upParams<Rect>): void {
+    const { origin, shapes, setter } = params;
+
+    setter([...shapes, origin]);
   }
   dragEnd(): void {
     throw new Error("Method not implemented.");

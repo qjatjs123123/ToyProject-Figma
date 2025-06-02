@@ -98,10 +98,6 @@ export default function useModeHandlers() {
   const batchTimeout = useRef<number | null>(null);
   const shapeStrategy = ShapeStrategyFactory.createShape(mode);
 
-  useEffect(() => {
-    console.log(tempShape);
-  }, [tempShape])
-
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
     if (isDragging.current) {
       return;
@@ -243,28 +239,12 @@ export default function useModeHandlers() {
       return;
     setIsCreating(false);
 
-    if (
-      mode === "Rectangle" &&
-      (tempShape as { name: string }).name === "Rectangle"
-    ) {
-      const command = new CreateCommand(
-        [...rectangles],
-        setRectangles,
-        [...rectangles, tempShape as RectShape],
-        drawingShapeRef,
-        setSelectedIds
-      );
-      CommandManager.execute(command);
-    } else if (mode === "ELLIPSE") {
-      const command = new CreateCommand(
-        [...ellipses],
-        setEllipses,
-        [...ellipses, tempShape as EllipseShape],
-        drawingShapeRef,
-        setSelectedIds
-      );
-      CommandManager.execute(command);
-    }
+    shapeStrategy.up({
+      origin: tempShape,
+      shapes: shapes,
+      setter: setShapes
+    })
+
 
     setMode("SELECT");
     tempShapeDispatch({
@@ -273,6 +253,50 @@ export default function useModeHandlers() {
     });
     selectShapesByDrageInit(e);
   };
+
+  // const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
+  //   startPoint.current = null;
+  //   if (!isCreating) {
+  //     return;
+  //   }
+  //   if (
+  //     tempShape &&
+  //     "width" in tempShape &&
+  //     (tempShape.height < 5 || tempShape.width < 5)
+  //   )
+  //     return;
+  //   setIsCreating(false);
+
+  //   if (
+  //     mode === "Rectangle" &&
+  //     (tempShape as { name: string }).name === "Rectangle"
+  //   ) {
+  //     const command = new CreateCommand(
+  //       [...rectangles],
+  //       setRectangles,
+  //       [...rectangles, tempShape as RectShape],
+  //       drawingShapeRef,
+  //       setSelectedIds
+  //     );
+  //     CommandManager.execute(command);
+  //   } else if (mode === "ELLIPSE") {
+  //     const command = new CreateCommand(
+  //       [...ellipses],
+  //       setEllipses,
+  //       [...ellipses, tempShape as EllipseShape],
+  //       drawingShapeRef,
+  //       setSelectedIds
+  //     );
+  //     CommandManager.execute(command);
+  //   }
+
+  //   setMode("SELECT");
+  //   tempShapeDispatch({
+  //     type: "INIT",
+  //     data: null as any,
+  //   });
+  //   selectShapesByDrageInit(e);
+  // };
 
   const selectShapesByDrageInit = (e: KonvaEventObject<MouseEvent>) => {
     const pos = e.target.getStage()?.getPointerPosition();

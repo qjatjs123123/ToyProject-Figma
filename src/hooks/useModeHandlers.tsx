@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useShapeRefState } from "../contexts/ShapeRefContext";
-import type { EllipseType, Mode } from "../type/Shape";
+import type { EllipseType, Mode, Rectangle } from "../type/Shape";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { rectangleAtom, shapeAllData } from "../Atoms/RectangleState";
 import { useAtom, useAtomValue } from "jotai";
 import Konva from "konva";
@@ -14,10 +14,10 @@ import type {
 } from "../contexts/shapeReducer";
 import { DragMoveCommand } from "../utils/MoveCommand";
 import { CommandManager } from "../utils/CommandManager";
-// import { useProxy } from "./useProxy";
 import { TransformCommand } from "../utils/TransformCommand";
-import { useProxy } from "./useProxy";
 import { CreateCommand } from "../utils/CreateCommand";
+import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
+import { shapeAtom } from "../Atoms/ShapeState";
 
 interface ElementProps {
   x: number;
@@ -84,6 +84,7 @@ export default function useModeHandlers() {
 
   const startPoint = useRef<any>({ x: 0, y: 0 });
   const shapeAll = useAtomValue(shapeAllData);
+  const [shapes, setShapes] = useAtom(shapeAtom);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
   // const [rectanglesP, setRectanglesP] = useProxy(useAtom(rectangleAtom));
@@ -95,6 +96,12 @@ export default function useModeHandlers() {
     Ellipse: setEllipses,
   };
   const batchTimeout = useRef<number | null>(null);
+  const shapeStrategy = ShapeStrategyFactory.createShape(mode);
+
+  useEffect(() => {
+    console.log(tempShape);
+  }, [tempShape])
+
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
     if (isDragging.current) {
       return;
@@ -123,26 +130,35 @@ export default function useModeHandlers() {
     if (e.target !== e.target.getStage()) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
+
     setIsCreating(true);
     startPoint.current = pos;
 
-    tempShapeDispatch({
-      type: mode,
-      data: {
-        startPoint: startPoint.current,
-        pos,
-        maxID: shapeMaxID(mode),
-        visible: true,
-        select: {
-          name: "select",
-          visible: true,
-          x1: pos.x,
-          y1: pos.y,
-          x2: pos.x,
-          y2: pos.y,
-        },
-      },
-    });
+
+    shapeStrategy.down({
+      id: 0,
+      startPoint: startPoint.current,
+      currentPoint: pos,
+      setter: tempShapeDispatch
+    })
+
+    // tempShapeDispatch({
+    //   type: mode,
+    //   data: {
+    //     startPoint: startPoint.current,
+    //     pos,
+    //     maxID: shapeMaxID(mode),
+    //     visible: true,
+    //     select: {
+    //       name: "select",
+    //       visible: true,
+    //       x1: pos.x,
+    //       y1: pos.y,
+    //       x2: pos.x,
+    //       y2: pos.y,
+    //     },
+    //   },
+    // });
 
     if (mode !== "SELECT")
       setSelectedIds([`${mappingTable[mode]} ${shapeMaxID(mode)}`]);
@@ -158,21 +174,14 @@ export default function useModeHandlers() {
 
     if (startPoint.current) isDragging.current = true;
 
-    tempShapeDispatch({
-      type: mode,
-      data: {
-        startPoint: startPoint.current,
-        pos,
-        visible: true,
-        select: {
-          ...tempShape,
-          x2: pos.x,
-          y2: pos.y,
-        },
-      },
-    });
+    shapeStrategy.move({
+      origin: tempShape,
+      startPoint: startPoint.current,
+      currentPoint: pos,
+      setter: tempShapeDispatch
+    })
 
-    handleSelectShapesByDrag();
+    // handleSelectShapesByDrag();
   };
 
   const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
@@ -235,7 +244,7 @@ export default function useModeHandlers() {
     setIsCreating(false);
 
     if (
-      mode === "RECT" &&
+      mode === "Rectangle" &&
       (tempShape as { name: string }).name === "Rectangle"
     ) {
       const command = new CreateCommand(

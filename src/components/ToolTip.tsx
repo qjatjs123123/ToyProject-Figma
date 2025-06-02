@@ -10,7 +10,7 @@ const Tooltip = () => {
 
   const modes = [
     { key: "SELECT", icon: () => <SelectIcon /> },
-    { key: "RECT", icon: (color: string) => <RectIcon color={color} /> },
+    { key: "Rectangle", icon: (color: string) => <RectIcon color={color} /> },
     { key: "ELLIPSE", icon: (color: string) => <EllipseIcon color={color} /> },
   ] as const;
 

@@ -2,7 +2,7 @@
 import { useShapeRefState } from "../contexts/ShapeRefContext";
 import type { EllipseType, Mode, Rectangle } from "../type/Shape";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { rectangleAtom, shapeAllData } from "../Atoms/RectangleState";
 import { useAtom, useAtomValue } from "jotai";
 import Konva from "konva";
@@ -18,6 +18,7 @@ import { TransformCommand } from "../utils/TransformCommand";
 import { CreateCommand } from "../utils/CreateCommand";
 import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
 import { shapeAtom } from "../Atoms/ShapeState";
+import { selectAtomByName } from "../Atoms/selectAtomByName";
 
 interface ElementProps {
   x: number;
@@ -87,8 +88,9 @@ export default function useModeHandlers() {
   const [shapes, setShapes] = useAtom(shapeAtom);
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
-  // const [rectanglesP, setRectanglesP] = useProxy(useAtom(rectangleAtom));
-  // const [ellipsesP, setEllipsesP] = useProxy(useAtom(EllipseAtom));
+  const selectedShapeAtom = useMemo(() => selectAtomByName(mode), [mode]);
+  const [selectByNameArr] = useAtom(selectedShapeAtom);
+
   const isDragging = useRef(false);
   const isBatching = useRef(false);
   const setterFunc = {
@@ -96,7 +98,13 @@ export default function useModeHandlers() {
     Ellipse: setEllipses,
   };
   const batchTimeout = useRef<number | null>(null);
-  const shapeStrategy = ShapeStrategyFactory.createShape(mode);
+  const shapeStrategy = ShapeStrategyFactory.createShape({
+    mode,
+    setTempShape: tempShapeDispatch,
+    tempShape,
+    shapes,
+    setShapes,
+  });
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
     if (isDragging.current) {
@@ -130,34 +138,12 @@ export default function useModeHandlers() {
     setIsCreating(true);
     startPoint.current = pos;
 
-
     shapeStrategy.down({
-      id: 0,
+      selectByNameArr,
       startPoint: startPoint.current,
       currentPoint: pos,
-      setter: tempShapeDispatch
-    })
-
-    // tempShapeDispatch({
-    //   type: mode,
-    //   data: {
-    //     startPoint: startPoint.current,
-    //     pos,
-    //     maxID: shapeMaxID(mode),
-    //     visible: true,
-    //     select: {
-    //       name: "select",
-    //       visible: true,
-    //       x1: pos.x,
-    //       y1: pos.y,
-    //       x2: pos.x,
-    //       y2: pos.y,
-    //     },
-    //   },
-    // });
-
-    if (mode !== "SELECT")
-      setSelectedIds([`${mappingTable[mode]} ${shapeMaxID(mode)}`]);
+      setSelectedIds
+    });
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
@@ -174,8 +160,8 @@ export default function useModeHandlers() {
       origin: tempShape,
       startPoint: startPoint.current,
       currentPoint: pos,
-      setter: tempShapeDispatch
-    })
+      setter: tempShapeDispatch,
+    });
 
     // handleSelectShapesByDrag();
   };
@@ -242,9 +228,8 @@ export default function useModeHandlers() {
     shapeStrategy.up({
       origin: tempShape,
       shapes: shapes,
-      setter: setShapes
-    })
-
+      setter: setShapes,
+    });
 
     setMode("SELECT");
     tempShapeDispatch({

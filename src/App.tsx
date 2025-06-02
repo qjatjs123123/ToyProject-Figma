@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import Input from "./components/Input";
 import { CommandManager } from "./utils/CommandManager";
 import { UpdateCommand } from "./utils/UpdateCommand";
+import { SHAPE } from "./utils/constants/constants";
 type ShapeName = "Rectangle" | "Ellipse";
 
 const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
@@ -367,7 +368,7 @@ const App = () => {
             />
           ))}
 
-          {tempShape && mode === "RECT" && (
+          {tempShape && mode === SHAPE.Rectangle && (
             <Rect {...tempShape} ref={drawingShapeRef} draggable={true} />
           )}
 

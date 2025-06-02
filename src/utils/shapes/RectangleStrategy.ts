@@ -1,14 +1,24 @@
 import type { Rect } from "../../type/Shape";
-import type { DownParams, moveParams, Shape, upParams } from "./Shape.interface";
+import { SHAPE } from "../constants/constants";
+import {
+  Shape,
+  type DownParams,
+  type moveParams,
+  type ShapeProps,
+} from "./Shape.abstract";
 
+export class RectangleStrategy extends Shape<Rect> {
+  constructor(props: ShapeProps<Rect>) {
+    super(props);
+  }
 
-export class RectangleStrategy implements Shape<Rect> {
-  down(params: DownParams<Rect>): void {
-    const { id, startPoint, currentPoint, setter } = params;
+  down(params: DownParams): void {
+    const { selectByNameArr, startPoint, currentPoint,setSelectedIds } = params;
 
+    const id = this.shapeMaxID(selectByNameArr)
     const rectData = {
       id,
-      name: "Rectangle",
+      name: SHAPE.Rectangle,
       type: "shape",
       fill: "#D9D9D9",
       stroke: "#D9D9D9",
@@ -20,26 +30,23 @@ export class RectangleStrategy implements Shape<Rect> {
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    setter(rectData);
+    this.setTempShape(rectData);
+    setSelectedIds([`${SHAPE.Rectangle} ${id}`])
   }
-  move(params: moveParams<Rect>): void {
-    const { origin, startPoint, currentPoint, setter } = params;
+  move(params: moveParams): void {
+    const { startPoint, currentPoint } = params;
 
     const rectData = {
-      ...origin!,
+      ...this.tempShape!,
       x: Math.min(startPoint.x, currentPoint.x),
       y: Math.min(startPoint.y, currentPoint.y),
       width: Math.abs(currentPoint.x - startPoint.x),
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    setter(rectData);
+    this.setTempShape(rectData);
   }
-  up(params: upParams<Rect>): void {
-    const { origin, shapes, setter } = params;
 
-    setter([...shapes, origin]);
-  }
   dragEnd(): void {
     throw new Error("Method not implemented.");
   }

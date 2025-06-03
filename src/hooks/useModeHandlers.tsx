@@ -22,6 +22,7 @@ import { selectAtomByName } from "../Atoms/selectAtomByName";
 import { SHAPE } from "../utils/constants/constants";
 import { HistoryManager } from "../utils/history/CommandManager";
 import { CreateHistory } from "../utils/history/CreateHistory";
+import { DragHistory } from "../utils/history/DragHistory";
 
 const mappingTable = {
   RECT: "Rectangle",
@@ -148,7 +149,7 @@ export default function useModeHandlers() {
 
     if (mode !== SHAPE.Select)
       HistoryManager.log(new CreateHistory({ tempShape, shapes, setShapes }));
-    
+
     shapeStrategy.up();
 
     startPoint.current = null;
@@ -167,33 +168,15 @@ export default function useModeHandlers() {
     }, 10);
   };
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isBatching.current) {
-      isBatching.current = true;
-      CommandManager.isBatching = true;
-      CommandManager.init();
-    }
+    if (mode !== SHAPE.Select) return;
 
-    const id = e.target.id();
-    const className = e.target.className?.toString() as keyof typeof setterFunc;
-    if (!className || !(className in setterFunc)) return;
-
+    const shapeId = e.target.id();
     const newPos = { x: e.target.x(), y: e.target.y() };
 
-    shapeStrategy.dragEnd(id, newPos);
-
-    const command = new DragMoveCommand(setterFunc[className], id, newPos);
-    CommandManager.execute(command);
-
-    if (batchTimeout.current) {
-      clearTimeout(batchTimeout.current);
-    }
-
-    batchTimeout.current = setTimeout(() => {
-      isBatching.current = false;
-      CommandManager.isBatching = false;
-      batchTimeout.current = null;
-      console.log(CommandManager.isBatching, isBatching.current);
-    }, 0);
+    const { originData, newData } = shapeStrategy.dragEnd(shapeId, newPos);
+    HistoryManager.log(
+      new DragHistory({ shapeId, setShapes, originData, newData })
+    );
   };
 
   return {

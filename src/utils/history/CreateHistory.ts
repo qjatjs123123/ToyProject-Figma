@@ -6,11 +6,11 @@ export class CreateHistory extends History {
     super(props)
   }
   redo(): void {
-    this.setShapes([...this.shapes, this.tempShape]);
+    this.setShapes!([...this.shapes!, this.tempShape]);
   }
   undo(): void {
-    const deleteArr = [...this.shapes].filter((shapes) => `${shapes.name} ${shapes.id}` !== `${this.tempShape.name} ${this.tempShape.id}`)
+    const deleteArr = [...this.shapes!].filter((shapes) => `${shapes.name} ${shapes.id}` !== `${this.tempShape.name} ${this.tempShape.id}`)
 
-    this.setShapes(deleteArr);
+    this.setShapes!(deleteArr);
   }
 }

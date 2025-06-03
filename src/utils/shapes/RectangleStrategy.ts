@@ -48,9 +48,6 @@ export class RectangleStrategy extends Shape<Rect> {
     this.setTempShape(rectData);
   }
 
-  dragEnd(): void {
-    throw new Error("Method not implemented.");
-  }
   transformEnd(): void {
     throw new Error("Method not implemented.");
   }

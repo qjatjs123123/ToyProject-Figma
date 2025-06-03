@@ -10,6 +10,7 @@ export class HistoryManager {
 
   static log(history: History) {
     if (!this.isBatching) {
+      this.historyStack = this.historyStack.slice(0, this.pointer + 1);
       this.historyStack.push([]);
       this.pointer++;
       this.isBatching = true;
@@ -24,7 +25,7 @@ export class HistoryManager {
 
     this.historyStack[this.pointer].push(history);
     this.handleBatchTimeout();
-    console.log(this.historyStack);
+    console.log(this.historyStack, this.pointer);
   }
 
   static handleBatchTimeout() {

@@ -18,10 +18,15 @@ export interface moveParams<> {
 }
 
 export interface ShapeProps<T> {
-  setShapes: (data: any) => void;
+  setShapes: React.Dispatch<React.SetStateAction<any>>;
   shapes: any[];
   setTempShape: (data: T) => void;
   tempShape: T | null;
+}
+
+export interface resultParams {
+  originData: any;
+  newData: any;
 }
 
 export abstract class Shape<T> {
@@ -53,24 +58,30 @@ export abstract class Shape<T> {
     return maxID + 1;
   };
 
-  dragEnd(shapeId : string, currentPoint: Point): void {
-    this.setShapes((prevShapes : any) => {
-      const newRects = [...prevShapes];
-      const index = newRects.findIndex(
-        (r) => `${r.name} ${r.id}` === shapeId
-      );
+  dragEnd(shapeId: string, currentPoint: Point): resultParams {
+    const result = { originData: null, newData: null } as resultParams;
+
+    this.setShapes((prevShapes: any) => {
+      const newShapes = [...prevShapes];
+      const index = newShapes.findIndex((r) => `${r.name} ${r.id}` === shapeId);
 
       if (index !== -1) {
-        this.prevState = { ...newRects[index] };
-        newRects[index] = {
-          ...newRects[index],
+        result.originData = { ...newShapes[index] };
+
+        const updatedShape = {
+          ...newShapes[index],
           x: currentPoint.x,
           y: currentPoint.y,
         };
+
+        newShapes[index] = updatedShape;
+        result.newData = updatedShape;
       }
 
-      return newRects;
+      return newShapes;
     });
+
+    return result;
   }
 
   transformEnd(): void {

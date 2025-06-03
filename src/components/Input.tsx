@@ -2,7 +2,7 @@ import React from "react";
 
 interface NumberInputProps {
   value: number;
-  onChange: (value: number) => void;
+  onChange: (value: React.ChangeEvent<HTMLInputElement>) => void;
   min?: number;
   max?: number;
   step?: number;

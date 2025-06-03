@@ -1,17 +1,19 @@
 import "../index.css";
-import { useShapeRefState } from "../contexts/ShapeRefContext";
 import Button from "./Button";
 import SelectIcon from "./SelectIcon";
 import RectIcon from "./RectIcon";
 import EllipseIcon from "./EllipseIcon";
+import { SHAPE } from "../utils/constants/constants";
+import { modeAtom } from "../Atoms/modeState";
+import { useAtom } from "jotai";
 
 const Tooltip = () => {
-  const { setMode, mode } = useShapeRefState();
+  const [mode, setMode] = useAtom(modeAtom);
 
   const modes = [
-    { key: "SELECT", icon: () => <SelectIcon /> },
-    { key: "RECT", icon: (color: string) => <RectIcon color={color} /> },
-    { key: "ELLIPSE", icon: (color: string) => <EllipseIcon color={color} /> },
+    { key: SHAPE.Select, icon: () => <SelectIcon /> },
+    { key: SHAPE.Rectangle, icon: (color: string) => <RectIcon color={color} /> },
+    { key: SHAPE.Ellipse, icon: (color: string) => <EllipseIcon color={color} /> },
   ] as const;
 
   return (

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback } from "react";
-import { CreateCommand } from "../utils/CreateCommand";
-import { CommandManager } from "../utils/CommandManager";
+import { CreateCommand } from "../utils/trash/CreateCommand";
+import { CommandManager } from "../utils/trash/CommandManager";
 
 export function useProxy([atom, setAtom]: any) {
   const setAtomProxy = useCallback(

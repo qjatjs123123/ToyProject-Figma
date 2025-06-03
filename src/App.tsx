@@ -12,8 +12,8 @@ import Button from "./components/Button";
 import { SketchPicker } from "react-color";
 import { useEffect, useState } from "react";
 import Input from "./components/Input";
-import { CommandManager } from "./utils/CommandManager";
-import { UpdateCommand } from "./utils/UpdateCommand";
+import { CommandManager } from "./utils/trash/CommandManager";
+import { UpdateCommand } from "./utils/trash/UpdateCommand";
 import { SHAPE } from "./utils/constants/constants";
 import { shapeAtom } from "./Atoms/ShapeState";
 import { HistoryManager } from "./utils/history/CommandManager";
@@ -406,7 +406,7 @@ const App = () => {
             />
           ))}
 
-          {tempShape && mode === "ELLIPSE" && (
+          {tempShape && mode === SHAPE.Ellipse && (
             <Ellipse {...tempShape} ref={drawingShapeRef} draggable={false} />
           )}
 

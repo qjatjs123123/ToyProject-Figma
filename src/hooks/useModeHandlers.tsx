@@ -1,21 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useShapeRefState } from "../contexts/ShapeRefContext";
-import type { EllipseType, Mode, Rectangle } from "../type/Shape";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { useEffect, useMemo, useRef } from "react";
-import { rectangleAtom, shapeAllData } from "../Atoms/RectangleState";
-import { useAtom, useAtomValue } from "jotai";
-import Konva from "konva";
-import { EllipseAtom } from "../Atoms/EllipseState";
-import type {
-  EllipseShape,
-  RectShape,
-  SelectionBox,
-} from "../contexts/shapeReducer";
-import { DragMoveCommand } from "../utils/MoveCommand";
-import { CommandManager } from "../utils/CommandManager";
-import { TransformCommand } from "../utils/TransformCommand";
-import { CreateCommand } from "../utils/CreateCommand";
+import { useMemo, useRef } from "react";
+import { useAtom } from "jotai";
 import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
 import { shapeAtom } from "../Atoms/ShapeState";
 import { selectAtomByName } from "../Atoms/selectAtomByName";
@@ -23,11 +10,6 @@ import { SHAPE } from "../utils/constants/constants";
 import { HistoryManager } from "../utils/history/CommandManager";
 import { CreateHistory } from "../utils/history/CreateHistory";
 import { UpdateHistory } from "../utils/history/UpdateHistory";
-
-const mappingTable = {
-  RECT: "Rectangle",
-  ELLIPSE: "Ellipse",
-};
 
 export default function useModeHandlers() {
   const {
@@ -43,20 +25,12 @@ export default function useModeHandlers() {
   } = useShapeRefState();
 
   const startPoint = useRef<any>({ x: 0, y: 0 });
-  const shapeAll = useAtomValue(shapeAllData);
   const [shapes, setShapes] = useAtom(shapeAtom);
-  const [rectangles, setRectangles] = useAtom(rectangleAtom);
-  const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const selectedShapeAtom = useMemo(() => selectAtomByName(mode), [mode]);
   const [selectByNameArr] = useAtom(selectedShapeAtom);
 
   const isDragging = useRef(false);
-  const isBatching = useRef(false);
-  const setterFunc = {
-    Rect: setRectangles,
-    Ellipse: setEllipses,
-  };
-  const batchTimeout = useRef<number | null>(null);
+
   const shapeStrategy = ShapeStrategyFactory.createShape({
     mode,
     setTempShape: tempShapeDispatch,
@@ -136,9 +110,9 @@ export default function useModeHandlers() {
   const handleMouseUp = () => {
     if (!isCreating) return;
     if (tempShape && (tempShape.height < 5 || tempShape.width < 5)) return;
-
-    if (mode !== SHAPE.Select)
-      HistoryManager.log(new CreateHistory({ tempShape, shapes, setShapes }));
+    console.log(drawingShapeRef)
+    // if (mode !== SHAPE.Select)
+      HistoryManager.log(new CreateHistory({ tempShape, shapes, setShapes, drawingShapeRef, setSelectedIds }));
 
     shapeStrategy.up();
 

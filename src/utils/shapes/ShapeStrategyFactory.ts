@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Mode } from "../../type/Shape";
 import { SHAPE } from "../constants/constants";
+import { EllipseStrategy } from "./ElllipseStrategy";
 import { RectangleStrategy } from "./RectangleStrategy";
 import { SelectStrategy } from "./SelectStrategy";
 import type { ShapeProps } from "./Shape.abstract";
@@ -22,6 +23,8 @@ export class ShapeStrategyFactory {
     switch (mode) {
       case SHAPE.Rectangle:
         return new RectangleStrategy(props);
+      case SHAPE.Ellipse:
+        return new EllipseStrategy(props);
       default:
         return new SelectStrategy(props);
     }

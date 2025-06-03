@@ -1,7 +1,8 @@
-import { MAX_HISTORY } from "../constants/constants";
-import type { History } from "./history.abstract";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { MAX_HISTORY } from "../constants/constants";
+import type { History } from "./History.abstract";
+
+
 export class HistoryManager {
   private static historyStack: any[] = [];
   private static pointer: number = -1;

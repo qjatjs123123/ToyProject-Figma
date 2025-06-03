@@ -20,6 +20,7 @@ import { rectangleAtom } from "../Atoms/RectangleState";
 import { EllipseAtom } from "../Atoms/EllipseState";
 import { SHAPE } from "../utils/constants/constants";
 import type { Mode } from "../type/Shape";
+import { shapeAtom } from "../Atoms/ShapeState";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
@@ -47,8 +48,9 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
   // const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
   const [tempShape, tempShapeDispatch] = useState();
   const [isCreating, setIsCreating] = useState(false);
-  const rectangles = useAtomValue(rectangleAtom);
-  const ellipses = useAtomValue(EllipseAtom);
+  // const rectangles = useAtomValue(rectangleAtom);
+  // const ellipses = useAtomValue(EllipseAtom);
+  const shapes = useAtomValue(shapeAtom);
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -59,9 +61,9 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
     const num = id.split(" ")[1];
 
     if (type === "Rectangle")
-      return rectangles.filter((item) => item.id === Number(num));
+      return shapes.filter((item : any) => item.id === Number(num));
     else if (type === "Ellipse")
-      return ellipses.filter((item) => item.id === Number(num));
+      return shapes.filter((item: any) => item.id === Number(num));
     return null;
   };
 

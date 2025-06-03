@@ -1,45 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Rect } from "../../type/Shape";
+import type { Ellipse } from "../../type/Shape";
 import { SHAPE, SHAPE_INIT_DATA } from "../constants/constants";
 import {
   Shape,
   type DownParams,
   type moveParams,
   type resultParams,
-  type ShapeProps,
 } from "./Shape.abstract";
 
-export class RectangleStrategy extends Shape<Rect> {
-  constructor(props: ShapeProps<Rect>) {
-    super(props);
-  }
-
+export class EllipseStrategy extends Shape<Ellipse> {
   down(params: DownParams): void {
     const { selectByNameArr, startPoint, currentPoint, setSelectedIds } =
       params;
 
     const id = this.shapeMaxID(selectByNameArr);
-    const rectData = {
+    const ellipseData = {
       id,
-      name: SHAPE.Rectangle,
+      name: SHAPE.Ellipse,
       type: "shape",
-      fill: SHAPE_INIT_DATA.rectangle.fill,
-      stroke: SHAPE_INIT_DATA.rectangle.stroke,
-      strokeWidth: SHAPE_INIT_DATA.rectangle.strokeWidth,
-      rotation: SHAPE_INIT_DATA.rectangle.rotation,
-      x: Math.min(startPoint.x, currentPoint.x),
-      y: Math.min(startPoint.y, currentPoint.y),
+      fill: SHAPE_INIT_DATA.ellipse.fill,
+      stroke: SHAPE_INIT_DATA.ellipse.stroke,
+      strokeWidth: SHAPE_INIT_DATA.ellipse.strokeWidth,
+      rotation: SHAPE_INIT_DATA.ellipse.rotation,
+      x: (startPoint.x + currentPoint.x) / 2,
+      y: (startPoint.y + currentPoint.y) / 2,
+      radiusX: Math.abs(currentPoint.x - startPoint.x) / 2,
+      radiusY: Math.abs(currentPoint.y - startPoint.y) / 2,
       width: Math.abs(currentPoint.x - startPoint.x),
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    this.setTempShape(rectData);
-    setSelectedIds([`${SHAPE.Rectangle} ${id}`]);
+    this.setTempShape(ellipseData);
+    setSelectedIds([`${SHAPE.Ellipse} ${id}`]);
   }
   move(params: moveParams): void {
     const { startPoint, currentPoint } = params;
 
-    const rectData = {
+    const ellipseData = {
       ...this.tempShape!,
       x: Math.min(startPoint.x, currentPoint.x),
       y: Math.min(startPoint.y, currentPoint.y),
@@ -47,9 +44,8 @@ export class RectangleStrategy extends Shape<Rect> {
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    this.setTempShape(rectData);
+    this.setTempShape(ellipseData);
   }
-
   transformEnd(shapeId: string, data: any): resultParams {
     const result = { originData: null, newData: null } as resultParams;
 
@@ -66,12 +62,14 @@ export class RectangleStrategy extends Shape<Rect> {
           y: data.y(),
           width: Math.max(5, data.width() * data.scaleX()),
           height: Math.max(5, data.height() * data.scaleY()),
+          radiusX: Math.abs(data.radiusX() * data.scaleX()),
+          radiusY: Math.abs(data.radiusY() * data.scaleY()),
           rotation: data.rotation(),
         };
 
         data.scaleX(1);
         data.scaleY(1);
-        
+
         newShapes[index] = updatedShape;
         result.newData = updatedShape;
       }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { History, type HistoryProps } from "./history.abstract";
+import { History, type HistoryProps } from "./History.abstract";
 
 export class UpdateHistory extends History {
   constructor(props: HistoryProps) {

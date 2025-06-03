@@ -46,7 +46,7 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
   } = useModeHandlers();
-
+  console.log(mode, SHAPE.Select,tempShape);
   const handleChangeColor = (selectedColor, shape) => {
     CommandManager.init();
     CommandManager.isBatching = true;
@@ -406,14 +406,14 @@ const App = () => {
             <Ellipse {...tempShape} ref={drawingShapeRef} draggable={false} />
           )}
 
-          {mode === "SELECT" && tempShape && tempShape.visible && (
+          {mode === SHAPE.Select && tempShape && tempShape.visible && (
             <Rect
               x={Math.min(tempShape.x1, tempShape.x2)}
               y={Math.min(tempShape.y1, tempShape.y2)}
               width={Math.abs(tempShape.x2 - tempShape.x1)}
               height={Math.abs(tempShape.y2 - tempShape.y1)}
-              fill="rgba(40, 108, 255, 0.36)"
-              stroke="#80D0FF"
+              fill={tempShape.fill}
+              stroke={tempShape.stroke}
             />
           )}
 

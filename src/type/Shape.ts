@@ -1,7 +1,7 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Ellipse } from "react-konva";
 
-export type Mode = "Rectangle" | "SELECT" | "ELLIPSE";
+export type Mode = "Rectangle" | "Select" | "Ellipse";
 
 export interface Ellipse {
   id: number;
@@ -35,6 +35,8 @@ export interface Rect {
 
 export interface Select {
   visible: boolean;
+  fill?: string;
+  stroke?: string;
   x1: number;
   y1: number;
   x2: number;

@@ -4,14 +4,15 @@ import Button from "./Button";
 import SelectIcon from "./SelectIcon";
 import RectIcon from "./RectIcon";
 import EllipseIcon from "./EllipseIcon";
+import { SHAPE } from "../utils/constants/constants";
 
 const Tooltip = () => {
   const { setMode, mode } = useShapeRefState();
 
   const modes = [
-    { key: "SELECT", icon: () => <SelectIcon /> },
-    { key: "Rectangle", icon: (color: string) => <RectIcon color={color} /> },
-    { key: "ELLIPSE", icon: (color: string) => <EllipseIcon color={color} /> },
+    { key: SHAPE.Select, icon: () => <SelectIcon /> },
+    { key: SHAPE.Rectangle, icon: (color: string) => <RectIcon color={color} /> },
+    { key: SHAPE.Ellipse, icon: (color: string) => <EllipseIcon color={color} /> },
   ] as const;
 
   return (

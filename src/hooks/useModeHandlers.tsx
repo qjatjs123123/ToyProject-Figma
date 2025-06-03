@@ -19,51 +19,7 @@ import { CreateCommand } from "../utils/CreateCommand";
 import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
 import { shapeAtom } from "../Atoms/ShapeState";
 import { selectAtomByName } from "../Atoms/selectAtomByName";
-
-interface ElementProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-}
-const degToRad = (angle: number) => (angle / 180) * Math.PI;
-
-const getCorner = (
-  pivotX: number,
-  pivotY: number,
-  diffX: number,
-  diffY: number,
-  angle: number
-) => {
-  const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-  angle += Math.atan2(diffY, diffX);
-  const x = pivotX + distance * Math.cos(angle);
-  const y = pivotY + distance * Math.sin(angle);
-  return { x, y };
-};
-
-const getClientRect = (element: ElementProps) => {
-  const { x, y, width, height, rotation = 0 } = element;
-  const rad = degToRad(rotation);
-
-  const p1 = getCorner(x, y, 0, 0, rad);
-  const p2 = getCorner(x, y, width, 0, rad);
-  const p3 = getCorner(x, y, width, height, rad);
-  const p4 = getCorner(x, y, 0, height, rad);
-
-  const minX = Math.min(p1.x, p2.x, p3.x, p4.x);
-  const minY = Math.min(p1.y, p2.y, p3.y, p4.y);
-  const maxX = Math.max(p1.x, p2.x, p3.x, p4.x);
-  const maxY = Math.max(p1.y, p2.y, p3.y, p4.y);
-
-  return {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY,
-  };
-};
+import { SHAPE } from "../utils/constants/constants";
 
 const mappingTable = {
   RECT: "Rectangle",
@@ -157,13 +113,10 @@ export default function useModeHandlers() {
     if (startPoint.current) isDragging.current = true;
 
     shapeStrategy.move({
-      origin: tempShape,
       startPoint: startPoint.current,
       currentPoint: pos,
-      setter: tempShapeDispatch,
+      setSelectedIds
     });
-
-    // handleSelectShapesByDrag();
   };
 
   const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
@@ -188,29 +141,6 @@ export default function useModeHandlers() {
     }, 0);
   };
 
-  // const getNewData = (obj: any, node: any, className: string) => {
-  //   if (className === "Rect") {
-  //     return {
-  //       ...obj,
-  //       x: node.x(),
-  //       y: node.y(),
-  //       width: Math.max(5, node.width() * node.scaleX()),
-  //       height: Math.max(5, node.height() * node.scaleY()),
-  //       rotation: node.rotation(),
-  //     };
-  //   } else if (className === "Ellipse") {
-  //     return {
-  //       ...obj,
-  //       x: node.x(),
-  //       y: node.y(),
-  //       width: Math.max(5, node.width() * node.scaleX()),
-  //       height: Math.max(5, node.height() * node.scaleY()),
-  //       radiusX: Math.abs(obj.radiusX * node.scaleX()),
-  //       radiusY: Math.abs(obj.radiusY * node.scaleY()),
-  //       rotation: node.rotation(),
-  //     };
-  //   }
-  // };
 
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
     startPoint.current = null;
@@ -225,63 +155,15 @@ export default function useModeHandlers() {
       return;
     setIsCreating(false);
 
-    shapeStrategy.up({
-      origin: tempShape,
-      shapes: shapes,
-      setter: setShapes,
-    });
+    shapeStrategy.up();
 
-    setMode("SELECT");
+    setMode(SHAPE.Select);
     tempShapeDispatch({
       type: "INIT",
       data: null as any,
     });
     selectShapesByDrageInit(e);
   };
-
-  // const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
-  //   startPoint.current = null;
-  //   if (!isCreating) {
-  //     return;
-  //   }
-  //   if (
-  //     tempShape &&
-  //     "width" in tempShape &&
-  //     (tempShape.height < 5 || tempShape.width < 5)
-  //   )
-  //     return;
-  //   setIsCreating(false);
-
-  //   if (
-  //     mode === "Rectangle" &&
-  //     (tempShape as { name: string }).name === "Rectangle"
-  //   ) {
-  //     const command = new CreateCommand(
-  //       [...rectangles],
-  //       setRectangles,
-  //       [...rectangles, tempShape as RectShape],
-  //       drawingShapeRef,
-  //       setSelectedIds
-  //     );
-  //     CommandManager.execute(command);
-  //   } else if (mode === "ELLIPSE") {
-  //     const command = new CreateCommand(
-  //       [...ellipses],
-  //       setEllipses,
-  //       [...ellipses, tempShape as EllipseShape],
-  //       drawingShapeRef,
-  //       setSelectedIds
-  //     );
-  //     CommandManager.execute(command);
-  //   }
-
-  //   setMode("SELECT");
-  //   tempShapeDispatch({
-  //     type: "INIT",
-  //     data: null as any,
-  //   });
-  //   selectShapesByDrageInit(e);
-  // };
 
   const selectShapesByDrageInit = (e: KonvaEventObject<MouseEvent>) => {
     const pos = e.target.getStage()?.getPointerPosition();
@@ -317,70 +199,6 @@ export default function useModeHandlers() {
       batchTimeout.current = null;
       console.log(CommandManager.isBatching, isBatching.current);
     }, 0);
-  };
-  // const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
-  //   const id = e.target.id();
-  //   const className = e.target.className?.toString() as keyof typeof setterFunc;
-
-  //   if (!className || !(className in setterFunc)) return;
-
-  //   setterFunc[className]((prevRects: any) => {
-  //     const newRects = [...prevRects];
-  //     const index = newRects.findIndex((r) => `${r.name} ${r.id}` === id);
-  //     if (index !== -1) {
-  //       newRects[index] = {
-  //         ...newRects[index],
-  //         x: e.target.x(),
-  //         y: e.target.y(),
-  //       };
-  //     }
-  //     return newRects;
-  //   });
-  // };
-
-  const handleSelectShapesByDrag = () => {
-    if (mode !== "SELECT") return;
-
-    const selBox = {
-      x: Math.min(
-        (tempShape as SelectionBox).x1,
-        (tempShape as SelectionBox).x2
-      ),
-      y: Math.min(
-        (tempShape as SelectionBox).y1,
-        (tempShape as SelectionBox).y2
-      ),
-      width: Math.abs(
-        (tempShape as SelectionBox).x2 - (tempShape as SelectionBox).x1
-      ),
-      height: Math.abs(
-        (tempShape as SelectionBox).y2 - (tempShape as SelectionBox).y1
-      ),
-    };
-
-    const selected = [...rectangles, ...ellipses].filter((rect) => {
-      if (rect.name === "Ellipse") {
-        const e = rect as EllipseType;
-        const ellipseBox = {
-          ...rect,
-          x: rect.x - e.radiusX,
-          y: rect.y - e.radiusY,
-        };
-        return Konva.Util.haveIntersection(selBox, ellipseBox);
-      } else if (rect.name === "Rectangle") {
-        return Konva.Util.haveIntersection(selBox, getClientRect(rect));
-      }
-    });
-
-    setSelectedIds(selected.map((rect) => `${rect.name} ${rect.id}`));
-  };
-
-  const shapeMaxID = (mode: Mode) => {
-    const maxID = shapeAll[mode].reduce((max, rect) => {
-      return Math.max(max, rect.id);
-    }, 1);
-
-    return maxID + 1;
   };
 
   return {

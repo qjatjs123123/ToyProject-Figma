@@ -14,6 +14,7 @@ export interface DownParams {
 export interface moveParams<> {
   startPoint: Point;
   currentPoint: Point;
+  setSelectedIds: (data: any) => void;
 }
 
 export interface ShapeProps<T> {
@@ -39,7 +40,7 @@ export abstract class Shape<T> {
   abstract down(params: DownParams): void;
   abstract move(params: moveParams): void;
 
-  protected up() {
+  public up() {
     this.setShapes([...this.shapes, this.tempShape]);
   }
 

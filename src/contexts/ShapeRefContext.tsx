@@ -18,8 +18,8 @@ import {
 import { useAtomValue } from "jotai";
 import { rectangleAtom } from "../Atoms/RectangleState";
 import { EllipseAtom } from "../Atoms/EllipseState";
-
-type Mode = "Rectangle" | "SELECT" | "ELLIPSE";
+import { SHAPE } from "../utils/constants/constants";
+import type { Mode } from "../type/Shape";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
@@ -30,7 +30,7 @@ interface ShapeRefContextType {
   selectedIds: string[];
   setSelectedIds: (ids: string[]) => void;
   setMode: React.Dispatch<React.SetStateAction<Mode>>;
-  tempShapeDispatch: React.Dispatch<React.SetStateAction<any>>
+  tempShapeDispatch: React.Dispatch<React.SetStateAction<any>>;
   mode: Mode;
   isCreating: any;
   setIsCreating: any;
@@ -42,7 +42,7 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>("SELECT"); // 전역상태?
+  const [mode, setMode] = useState<Mode>(SHAPE.Select); // 전역상태?
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
   const [tempShape, tempShapeDispatch] = useState();
@@ -58,18 +58,19 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
     const type = id.split(" ")[0];
     const num = id.split(" ")[1];
 
-    if (type === "Rectangle") return rectangles.filter((item) => item.id === Number(num));
-    else if (type === "Ellipse") return ellipses.filter((item) => item.id === Number(num));
+    if (type === "Rectangle")
+      return rectangles.filter((item) => item.id === Number(num));
+    else if (type === "Ellipse")
+      return ellipses.filter((item) => item.id === Number(num));
     return null;
   };
-
 
   useEffect(() => {
     const transformer = transformerRef.current;
 
     if (!transformer) return;
 
-    if (selectedIds.length === 0 ) {
+    if (selectedIds.length === 0) {
       transformer.nodes([]);
       return;
     }
@@ -86,13 +87,11 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
       if (data) nodes.push(data);
     });
 
-
     if (isCreating && drawingShapeRef.current) {
       transformerRef.current?.nodes([drawingShapeRef.current]);
     } else {
       transformerRef.current?.nodes(nodes);
     }
-
   }, [selectedIds, isCreating]);
 
   return (

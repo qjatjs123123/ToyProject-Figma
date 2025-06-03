@@ -1,11 +1,12 @@
 import type { Rect } from "../../type/Shape";
-import { SHAPE } from "../constants/constants";
+import { SHAPE, SHAPE_INIT_DATA } from "../constants/constants";
 import {
   Shape,
   type DownParams,
   type moveParams,
   type ShapeProps,
 } from "./Shape.abstract";
+
 
 export class RectangleStrategy extends Shape<Rect> {
   constructor(props: ShapeProps<Rect>) {
@@ -20,10 +21,10 @@ export class RectangleStrategy extends Shape<Rect> {
       id,
       name: SHAPE.Rectangle,
       type: "shape",
-      fill: "#D9D9D9",
-      stroke: "#D9D9D9",
-      strokeWidth: 5,
-      rotation: 0,
+      fill: SHAPE_INIT_DATA.rectangle.fill,
+      stroke: SHAPE_INIT_DATA.rectangle.stroke,
+      strokeWidth: SHAPE_INIT_DATA.rectangle.strokeWidth,
+      rotation: SHAPE_INIT_DATA.rectangle.rotation,
       x: Math.min(startPoint.x, currentPoint.x),
       y: Math.min(startPoint.y, currentPoint.y),
       width: Math.abs(currentPoint.x - startPoint.x),

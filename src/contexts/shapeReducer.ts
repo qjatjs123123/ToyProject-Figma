@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Mode } from "../type/Shape";
+import type { Ellipse, Mode, Rect } from "../type/Shape";
 
 type Position = {
   x: number;
@@ -48,7 +48,7 @@ export type SelectionBox = {
   y:number
 };
 
-export type TempShape = RectShape | EllipseShape | SelectionBox ;
+export type TempShape = Rect | Ellipse
 
 export type TempShapeAction = {
   type: Mode | "INIT";

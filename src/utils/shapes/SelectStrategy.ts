@@ -1,15 +1,30 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Select } from "../../type/Shape";
 import {
   Shape,
   type DownParams,
   type moveParams,
+  type resultParams,
   type ShapeProps,
 } from "./Shape.abstract";
 import { SHAPE, SHAPE_INIT_DATA } from "../constants/constants";
 import Konva from "konva";
+import { ShapeStrategyFactory } from "./ShapeStrategyFactory";
 
 export class SelectStrategy extends Shape<Select> {
+  transformEnd(shapeId: string, data: any) : resultParams {
+
+    const shapeStrategy = ShapeStrategyFactory.createShape({
+      mode: data.name(),
+      setTempShape: this.setTempShape,
+      tempShape: this.tempShape,
+      shapes: this.shapes,
+      setShapes: this.setShapes,
+    });
+
+    return shapeStrategy.transformEnd(shapeId, data);
+  }
   constructor(props: ShapeProps<Select>) {
     super(props);
   }

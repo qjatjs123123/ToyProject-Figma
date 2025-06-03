@@ -25,7 +25,6 @@ export class HistoryManager {
 
     this.historyStack[this.pointer].push(history);
     this.handleBatchTimeout();
-    console.log(this.historyStack, this.pointer);
   }
 
   static handleBatchTimeout() {

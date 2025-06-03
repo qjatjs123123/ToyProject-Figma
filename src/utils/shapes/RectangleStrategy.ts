@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Rect } from "../../type/Shape";
 import { SHAPE, SHAPE_INIT_DATA } from "../constants/constants";
 import {
   Shape,
   type DownParams,
   type moveParams,
+  type resultParams,
   type ShapeProps,
 } from "./Shape.abstract";
-
 
 export class RectangleStrategy extends Shape<Rect> {
   constructor(props: ShapeProps<Rect>) {
@@ -14,9 +15,10 @@ export class RectangleStrategy extends Shape<Rect> {
   }
 
   down(params: DownParams): void {
-    const { selectByNameArr, startPoint, currentPoint,setSelectedIds } = params;
+    const { selectByNameArr, startPoint, currentPoint, setSelectedIds } =
+      params;
 
-    const id = this.shapeMaxID(selectByNameArr)
+    const id = this.shapeMaxID(selectByNameArr);
     const rectData = {
       id,
       name: SHAPE.Rectangle,
@@ -32,7 +34,7 @@ export class RectangleStrategy extends Shape<Rect> {
     };
 
     this.setTempShape(rectData);
-    setSelectedIds([`${SHAPE.Rectangle} ${id}`])
+    setSelectedIds([`${SHAPE.Rectangle} ${id}`]);
   }
   move(params: moveParams): void {
     const { startPoint, currentPoint } = params;
@@ -48,7 +50,35 @@ export class RectangleStrategy extends Shape<Rect> {
     this.setTempShape(rectData);
   }
 
-  transformEnd(): void {
-    throw new Error("Method not implemented.");
+  transformEnd(shapeId: string, data: any): resultParams {
+    const result = { originData: null, newData: null } as resultParams;
+
+    this.setShapes((prevShapes: any) => {
+      const newShapes = [...prevShapes];
+      const index = newShapes.findIndex((r) => `${r.name} ${r.id}` === shapeId);
+
+      if (index !== -1) {
+        result.originData = { ...newShapes[index] };
+
+        const updatedShape = {
+          ...newShapes[index],
+          x: data.x(),
+          y: data.y(),
+          width: Math.max(5, data.width() * data.scaleX()),
+          height: Math.max(5, data.height() * data.scaleY()),
+          rotation: data.rotation(),
+        };
+
+        data.scaleX(1);
+        data.scaleY(1);
+        
+        newShapes[index] = updatedShape;
+        result.newData = updatedShape;
+      }
+
+      return newShapes;
+    });
+    console.log(result);
+    return result;
   }
 }

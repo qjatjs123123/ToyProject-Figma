@@ -122,28 +122,18 @@ export default function useModeHandlers() {
   };
 
   const handleTransformEnd = (e: KonvaEventObject<MouseEvent>) => {
-    if (!isBatching.current) {
-      isBatching.current = true;
-      CommandManager.isBatching = true;
-      CommandManager.init();
-    }
+    const shapeId = e.target.id();
+    const shapeName = e.target.className?.toString();
 
-    const id = e.target.id();
-    const className = e.target.className?.toString() as keyof typeof setterFunc;
-
-    if (!className || !(className in setterFunc)) return;
-
-    const command = new TransformCommand(setterFunc[className], id, e.target);
-    CommandManager.execute(command);
-
-    batchTimeout.current = setTimeout(() => {
-      isBatching.current = false;
-      CommandManager.isBatching = false;
-      batchTimeout.current = null;
-    }, 0);
+    if (!shapeName) return;
+    
+    const { originData, newData } = shapeStrategy.transformEnd(shapeId, e.target);
+    // HistoryManager.log(
+    //   new DragHistory({ shapeId, setShapes, originData, newData })
+    // );
   };
 
-  const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
+  const handleMouseUp = () => {
     if (!isCreating) return;
     if (tempShape && (tempShape.height < 5 || tempShape.width < 5)) return;
 
@@ -156,17 +146,11 @@ export default function useModeHandlers() {
     setIsCreating(false);
     setMode(SHAPE.Select);
     tempShapeDispatch(null);
-    selectShapesByDrageInit(e);
-  };
-
-  const selectShapesByDrageInit = (e: KonvaEventObject<MouseEvent>) => {
-    const pos = e.target.getStage()?.getPointerPosition();
-    if (!pos) return;
-
     setTimeout(() => {
       isDragging.current = false;
     }, 10);
   };
+
   const handleDragEnd = (e: KonvaEventObject<MouseEvent>) => {
     if (mode !== SHAPE.Select) return;
 

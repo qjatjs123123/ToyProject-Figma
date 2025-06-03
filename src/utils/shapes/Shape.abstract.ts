@@ -84,7 +84,5 @@ export abstract class Shape<T> {
     return result;
   }
 
-  transformEnd(): void {
-    // 선택적으로 공통 구현 가능
-  }
+  abstract transformEnd(shapeId: string, data: any): resultParams;
 }

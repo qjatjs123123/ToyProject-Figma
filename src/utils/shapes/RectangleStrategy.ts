@@ -22,7 +22,7 @@ export class RectangleStrategy extends Shape<Rect> {
     const rectData = {
       id,
       name: SHAPE.Rectangle,
-      type: "shape",
+      type: SHAPE.Rectangle,
       fill: SHAPE_INIT_DATA.rectangle.fill,
       stroke: SHAPE_INIT_DATA.rectangle.stroke,
       strokeWidth: SHAPE_INIT_DATA.rectangle.strokeWidth,
@@ -33,7 +33,7 @@ export class RectangleStrategy extends Shape<Rect> {
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    this.setTempShape(rectData);
+    this.setTempShape(rectData as Rect);
     setSelectedIds([`${SHAPE.Rectangle} ${id}`]);
   }
   move(params: moveParams): void {

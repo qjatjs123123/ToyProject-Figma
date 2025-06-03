@@ -14,7 +14,7 @@ export interface Ellipse {
   rotation: number;
   stroke: string;
   strokeWidth?: number;
-  type?: string;
+  type: "Ellipse";
   width: number;
   height: number;
 }
@@ -28,7 +28,7 @@ export interface Rect {
   height: number;
   fill?: string;
   rotation: number;
-  type?: string;
+  type: "Rectangle";
   stroke?: string;
   strokeWidth?: number;
 }

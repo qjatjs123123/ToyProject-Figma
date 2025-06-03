@@ -53,6 +53,7 @@ export class SelectStrategy extends Shape<Select> {
       y2: currentPoint.y,
       fill: SHAPE_INIT_DATA.select.fill,
       stroke: SHAPE_INIT_DATA.select.stroke,
+      type: SHAPE.Select
     } as Select;
 
     this.setTempShape(selectData);

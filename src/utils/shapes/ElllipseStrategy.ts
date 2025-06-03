@@ -17,7 +17,7 @@ export class EllipseStrategy extends Shape<Ellipse> {
     const ellipseData = {
       id,
       name: SHAPE.Ellipse,
-      type: "shape",
+      type: SHAPE.Ellipse,
       fill: SHAPE_INIT_DATA.ellipse.fill,
       stroke: SHAPE_INIT_DATA.ellipse.stroke,
       strokeWidth: SHAPE_INIT_DATA.ellipse.strokeWidth,
@@ -30,16 +30,17 @@ export class EllipseStrategy extends Shape<Ellipse> {
       height: Math.abs(currentPoint.y - startPoint.y),
     };
 
-    this.setTempShape(ellipseData);
+    this.setTempShape(ellipseData as Ellipse);
     setSelectedIds([`${SHAPE.Ellipse} ${id}`]);
   }
   move(params: moveParams): void {
     const { startPoint, currentPoint } = params;
-
     const ellipseData = {
       ...this.tempShape!,
-      x: Math.min(startPoint.x, currentPoint.x),
-      y: Math.min(startPoint.y, currentPoint.y),
+      x: (startPoint.x + currentPoint.x) / 2,
+      y: (startPoint.y + currentPoint.y) / 2,
+      radiusX: Math.abs(currentPoint.x - startPoint.x) / 2,
+      radiusY: Math.abs(currentPoint.y - startPoint.y) / 2,
       width: Math.abs(currentPoint.x - startPoint.x),
       height: Math.abs(currentPoint.y - startPoint.y),
     };
@@ -48,7 +49,6 @@ export class EllipseStrategy extends Shape<Ellipse> {
   }
   transformEnd(shapeId: string, data: any): resultParams {
     const result = { originData: null, newData: null } as resultParams;
-
     this.setShapes((prevShapes: any) => {
       const newShapes = [...prevShapes];
       const index = newShapes.findIndex((r) => `${r.name} ${r.id}` === shapeId);

@@ -22,7 +22,7 @@ import { selectAtomByName } from "../Atoms/selectAtomByName";
 import { SHAPE } from "../utils/constants/constants";
 import { HistoryManager } from "../utils/history/CommandManager";
 import { CreateHistory } from "../utils/history/CreateHistory";
-import { DragHistory } from "../utils/history/DragHistory";
+import { UpdateHistory } from "../utils/history/UpdateHistory";
 
 const mappingTable = {
   RECT: "Rectangle",
@@ -126,11 +126,11 @@ export default function useModeHandlers() {
     const shapeName = e.target.className?.toString();
 
     if (!shapeName) return;
-    
+
     const { originData, newData } = shapeStrategy.transformEnd(shapeId, e.target);
-    // HistoryManager.log(
-    //   new DragHistory({ shapeId, setShapes, originData, newData })
-    // );
+    HistoryManager.log(
+      new UpdateHistory({ shapeId, setShapes, originData, newData })
+    );
   };
 
   const handleMouseUp = () => {
@@ -159,7 +159,7 @@ export default function useModeHandlers() {
 
     const { originData, newData } = shapeStrategy.dragEnd(shapeId, newPos);
     HistoryManager.log(
-      new DragHistory({ shapeId, setShapes, originData, newData })
+      new UpdateHistory({ shapeId, setShapes, originData, newData })
     );
   };
 

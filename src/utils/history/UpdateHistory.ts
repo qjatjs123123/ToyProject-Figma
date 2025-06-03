@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { History, type HistoryProps } from "./history.abstract";
 
-export class DragHistory extends History {
+export class UpdateHistory extends History {
   constructor(props: HistoryProps) {
     super(props);
 

@@ -6,7 +6,7 @@ import Button from "./Button";
 interface ColorPickerButtonProps {
   shape: any;
   handleChangeColor: (color: ColorResult) => void;
-  color: string;
+  color: string | undefined;
 }
 
 export const ColorPickerButton = ({shape, handleChangeColor, color}: ColorPickerButtonProps) => {
@@ -30,7 +30,7 @@ export const ColorPickerButton = ({shape, handleChangeColor, color}: ColorPicker
               }}
             >
               <SketchPicker
-                color={shape!.fill}
+                color={shape?.fill}
                 onChangeComplete={(color: ColorResult ) => {handleChangeColor(color)}}
               />
             </div>

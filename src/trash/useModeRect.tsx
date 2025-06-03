@@ -43,7 +43,7 @@ export default function useModeRect() {
   }, [selectedIds, creatingRect]);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    console.log("down")
+
     if (e.target !== e.target.getStage()) return;
 
     const pos = e.target.getStage().getPointerPosition();

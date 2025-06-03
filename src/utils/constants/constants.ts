@@ -27,7 +27,13 @@ export const SHAPE_INIT_DATA = {
 
 export const SHAPE_CONFIG = {
   fill : "fill",
-  stroke: "stroke"
+  stroke: "stroke",
+  strokeWidth: "strokeWidth"
+}
+
+export const STROKE_WIDTH_LENGTH = {
+  max : 50,
+  min: 5
 }
 
 export const MAX_HISTORY = 40;

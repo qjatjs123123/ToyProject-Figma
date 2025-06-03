@@ -28,7 +28,7 @@ export class CommandManager {
       if (this.pointer < -1) this.pointer = -1; 
     }
 
-    console.log(this.history);
+
   }
 
   static undo() {

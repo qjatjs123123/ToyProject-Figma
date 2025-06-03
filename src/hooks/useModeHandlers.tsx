@@ -27,7 +27,7 @@ export default function useModeHandlers() {
   const [shapes, setShapes] = useAtom(shapeAtom);
   const selectedShapeAtom = useMemo(() => selectAtomByName(mode), [mode]);
   const [selectByNameArr] = useAtom(selectedShapeAtom);
-  console.log(mode);
+
   const isDragging = useRef(false);
 
   const shapeStrategy = ShapeStrategyFactory.createShape({

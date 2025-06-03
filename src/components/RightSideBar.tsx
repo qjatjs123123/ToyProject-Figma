@@ -4,14 +4,17 @@ import SideBar from "./SideBar";
 import { selectedIdsAtom } from "../Atoms/SelectedId";
 import Button from "./Button";
 import { ColorPickerButton } from "./ColorPickerButton";
-// import Input from "./Input";
+import Input from "./Input";
 import { shapeAtom } from "../Atoms/ShapeState";
 import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
 import { modeAtom } from "../Atoms/modeState";
 import { HistoryManager } from "../utils/history/CommandManager";
 import { UpdateHistory } from "../utils/history/UpdateHistory";
 import type { ColorResult } from "react-color";
-import { SHAPE_CONFIG } from "../utils/constants/constants";
+import {
+  SHAPE_CONFIG,
+  STROKE_WIDTH_LENGTH,
+} from "../utils/constants/constants";
 
 export const RightSideBar = () => {
   const selectedIds = useAtomValue(selectedIdsAtom);
@@ -30,7 +33,8 @@ export const RightSideBar = () => {
     shapes,
     setShapes,
   });
-  const handleChangeProps = (value: any , props: string) => {
+
+  const handleChangeProps = (value: any, props: string) => {
     selectedIds.forEach((shapeId: string) => {
       const { originData, newData } = shapeStrategy.update(shapeId, {
         [props]: value,
@@ -40,6 +44,29 @@ export const RightSideBar = () => {
         new UpdateHistory({ shapeId, setShapes, originData, newData })
       );
     });
+  };
+
+  const handleChangeStrokeNum = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value, 10);
+
+    if (
+      !shape ||
+      isNaN(newValue) ||
+      newValue < STROKE_WIDTH_LENGTH.min ||
+      newValue > STROKE_WIDTH_LENGTH.max
+    )
+      return;
+
+    let alpha = 0;
+    const value = shape.strokeWidth;
+
+    if (newValue < value) alpha = -1;
+    else alpha = +1;
+
+    handleChangeProps(
+     shape.strokeWidth + alpha,
+      SHAPE_CONFIG.strokeWidth
+    );
   };
 
   return (
@@ -103,21 +130,15 @@ export const RightSideBar = () => {
           }}
           content="Weight"
         />
-        {/* {selectedIds.length > 0 ? (
-          <Input
-            onChange={handleChangeStrokeNum}
-            value={
-              getShapeObject(selectedIds[selectedIds.length - 1])[0]
-                ?.strokeWidth ?? ""
-            }
-          />
+        {shape ? (
+          <Input onChange={handleChangeStrokeNum} value={shape?.strokeWidth} />
         ) : (
           <Button className="center relative">
             <div style={{ height: "20px" }} className="center">
               No Selected
             </div>
           </Button>
-        )} */}
+        )}
       </SideBar.Content>
     </SideBar>
   );

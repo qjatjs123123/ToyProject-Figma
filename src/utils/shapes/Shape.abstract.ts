@@ -1,3 +1,5 @@
+
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Point {
   x: number;
@@ -20,7 +22,7 @@ export interface moveParams<> {
 export interface ShapeProps<T> {
   setShapes: React.Dispatch<React.SetStateAction<any>>;
   shapes: any[];
-  setTempShape: (data: T) => void;
+  setTempShape: (data: T) => void | null;
   tempShape: T | null;
 }
 
@@ -72,6 +74,31 @@ export abstract class Shape<T> {
           ...newShapes[index],
           x: currentPoint.x,
           y: currentPoint.y,
+        };
+
+        newShapes[index] = updatedShape;
+        result.newData = updatedShape;
+      }
+
+      return newShapes;
+    });
+
+    return result;
+  }
+
+  update(shapeId: string, updateProps: any): resultParams {
+    const result = { originData: null, newData: null } as resultParams;
+
+    this.setShapes((prevShapes: any) => {
+      const newShapes = [...prevShapes];
+      const index = newShapes.findIndex((r) => `${r.name} ${r.id}` === shapeId);
+
+      if (index !== -1) {
+        result.originData = { ...newShapes[index] };
+
+        const updatedShape = {
+          ...newShapes[index],
+          ...updateProps
         };
 
         newShapes[index] = updatedShape;

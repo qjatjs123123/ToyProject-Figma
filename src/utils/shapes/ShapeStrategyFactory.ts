@@ -7,7 +7,7 @@ import { SelectStrategy } from "./SelectStrategy";
 import type { ShapeProps } from "./Shape.abstract";
 
 interface ShapeFactoryProps extends ShapeProps<any> {
-  mode: Mode;
+  mode?: Mode;
 }
 
 export class ShapeStrategyFactory {

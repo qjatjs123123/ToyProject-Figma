@@ -25,4 +25,9 @@ export const SHAPE_INIT_DATA = {
   }
 } ;
 
+export const SHAPE_CONFIG = {
+  fill : "fill",
+  stroke: "stroke"
+}
+
 export const MAX_HISTORY = 40;

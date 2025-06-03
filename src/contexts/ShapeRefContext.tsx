@@ -5,22 +5,18 @@ import {
   createContext,
   useContext,
   useEffect,
-  useReducer,
   useRef,
   useState,
 } from "react";
 import type { ReactNode, RefObject } from "react";
 import {
-  tempShapeReducer,
   type TempShape,
-  type TempShapeAction,
 } from "./shapeReducer";
-import { useAtomValue } from "jotai";
-import { rectangleAtom } from "../Atoms/RectangleState";
-import { EllipseAtom } from "../Atoms/EllipseState";
+import { useAtom, useAtomValue } from "jotai";
 import { SHAPE } from "../utils/constants/constants";
 import type { Mode } from "../type/Shape";
 import { shapeAtom } from "../Atoms/ShapeState";
+import { selectedIdsAtom } from "../Atoms/SelectedId";
 
 interface ShapeRefContextType {
   rectRefs: RefObject<Map<string, Rect>>;
@@ -43,13 +39,9 @@ const ShapeRefContext = createContext<ShapeRefContextType | undefined>(
 );
 
 export function ShapeRefProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<Mode>(SHAPE.Select); // 전역상태?
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  // const [tempShape, tempShapeDispatch] = useReducer(tempShapeReducer, null);
+  const [selectedIds, setSelectedIds] = useAtom(selectedIdsAtom);
   const [tempShape, tempShapeDispatch] = useState();
   const [isCreating, setIsCreating] = useState(false);
-  // const rectangles = useAtomValue(rectangleAtom);
-  // const ellipses = useAtomValue(EllipseAtom);
   const shapes = useAtomValue(shapeAtom);
   const rectRefs = useRef(new Map());
   const ellipseRefs = useRef(new Map());
@@ -105,13 +97,11 @@ export function ShapeRefProvider({ children }: { children: ReactNode }) {
         drawingShapeRef,
         ellipseRefs,
         setSelectedIds,
-        setMode,
         isCreating,
         setIsCreating,
         tempShape,
         tempShapeDispatch,
         getShapeObject,
-        mode,
       }}
     >
       {children}

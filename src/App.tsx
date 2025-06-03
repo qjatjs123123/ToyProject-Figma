@@ -17,6 +17,9 @@ import { UpdateCommand } from "./utils/trash/UpdateCommand";
 import { SHAPE } from "./utils/constants/constants";
 import { shapeAtom } from "./Atoms/ShapeState";
 import { HistoryManager } from "./utils/history/CommandManager";
+import { LeftSideBar } from "./components/LeftSideBar";
+import { RightSideBar } from "./components/RightSideBar";
+import { modeAtom } from "./Atoms/modeState";
 type ShapeName = "Rectangle" | "Ellipse";
 
 const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
@@ -25,6 +28,7 @@ const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
 };
 
 const App = () => {
+  const mode = useAtomValue(modeAtom);
   const [shapes, setShapes] = useAtom(shapeAtom)
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
@@ -37,9 +41,7 @@ const App = () => {
     drawingShapeRef,
     selectedIds,
     tempShape,
-    setSelectedIds,
     getShapeObject,
-    mode,
   } = useShapeRefState();
   const {
     handleMouseDown,
@@ -163,181 +165,8 @@ const App = () => {
 
   return (
     <>
-      <SideBar className="leftSideBarLayout flex_col">
-        <SideBar.Header content="제목1" type="big" className="paddingSideBar" />
-        <SideBar.SpaceBar />
-        <SideBar.Header
-          content="Shapes"
-          style={{ marginTop: "10px", marginBottom: "10px" }}
-          className="paddingSideBar paddingSideBarMedium"
-        />
-        <SideBar.SpaceBar />
-        <SideBar.Content className="overflow-y">
-          {[...rectangles, ...ellipses].map(({ name, id }) => (
-            <div
-              key={`${name} ${id}`}
-              onClick={() => setSelectedIds([...selectedIds, `${name} ${id}`])}
-              className={`shape-item${
-                selectedIds.includes(`${name} ${id}`) ? " primary" : ""
-              }`}
-            >
-              {shapeItemMap[name as ShapeName]("black")}
-              <span>
-                {name} {id}
-              </span>
-            </div>
-          ))}
-        </SideBar.Content>
-      </SideBar>
-
-      <SideBar className="rightSideBarLayout flex_col">
-        <SideBar.Header
-          className="paddingSideBar"
-          content={<Button className="btnPad">Design</Button>}
-        />
-        <SideBar.SpaceBar />
-        <SideBar.Header
-          className="paddingSideBar"
-          content={
-            selectedIds.length === 1
-              ? selectedIds[0].split(" ")[0]
-              : `${selectedIds.length} selected`
-          }
-        />
-        <SideBar.SpaceBar />
-        <SideBar.Header
-          className="paddingSideBar"
-          style={{ fontSize: "12px" }}
-          content="Position"
-        />
-        <SideBar.SpaceBar />
-        <SideBar.Header
-          className="paddingSideBar"
-          style={{ fontSize: "12px" }}
-          content="Fill"
-        />
-        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
-          <Button
-            className="center relative"
-            onClick={() => setShowPicker(!showPicker)}
-          >
-            {selectedIds.length > 0 ? (
-              (() => {
-                const shape = getShapeObject(
-                  selectedIds[selectedIds.length - 1]
-                )[0];
-                const fillColor = shape?.fill || "";
-
-                return (
-                  <div className="color-display">
-                    <div
-                      className="color-box"
-                      style={{ backgroundColor: fillColor }}
-                    />
-                    <span>{fillColor}</span>
-                    {showPicker && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: "-235px",
-                          top: "0",
-                        }}
-                      >
-                        <SketchPicker
-                          color={fillColor}
-                          onChangeComplete={(color) =>
-                            handleChangeColor(color, shape)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })()
-            ) : (
-              <div style={{ height: "20px" }} className="center">
-                No Selected
-              </div>
-            )}
-          </Button>
-        </SideBar.Content>
-
-        <SideBar.SpaceBar />
-        <SideBar.Header
-          className="paddingSideBar"
-          style={{ fontSize: "12px" }}
-          content="Stroke"
-        />
-        <SideBar.Content style={{ paddingLeft: "12px", marginBottom: "10px" }}>
-          <Button
-            className="center relative"
-            onClick={() => setShowStrokePicker(!showStrokePicker)}
-          >
-            {selectedIds.length > 0 ? (
-              (() => {
-                const shape = getShapeObject(
-                  selectedIds[selectedIds.length - 1]
-                )[0];
-                const strokeColor = shape?.stroke || "";
-
-                return (
-                  <div className="color-display">
-                    <div
-                      className="color-box"
-                      style={{ backgroundColor: strokeColor }}
-                    />
-                    <span>{strokeColor}</span>
-                    {showStrokePicker && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: "-235px",
-                          top: "0",
-                        }}
-                      >
-                        <SketchPicker
-                          color={strokeColor}
-                          onChangeComplete={(color) =>
-                            handleChangeSrokeColor(color, shape)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })()
-            ) : (
-              <div style={{ height: "20px" }} className="center">
-                No Selected
-              </div>
-            )}
-          </Button>
-          <SideBar.Header
-            style={{
-              color: "gray",
-              marginTop: "15px",
-              marginBottom: "7px",
-              fontSize: "10px",
-            }}
-            content="Weight"
-          />
-          {selectedIds.length > 0 ? (
-            <Input
-              onChange={handleChangeStrokeNum}
-              value={
-                getShapeObject(selectedIds[selectedIds.length - 1])[0]
-                  ?.strokeWidth ?? ""
-              }
-            />
-          ) : (
-            <Button className="center relative">
-              <div style={{ height: "20px" }} className="center">
-                No Selected
-              </div>
-            </Button>
-          )}
-        </SideBar.Content>
-      </SideBar>
+      <LeftSideBar />
+      <RightSideBar />
 
       <Tooltip />
       <Stage

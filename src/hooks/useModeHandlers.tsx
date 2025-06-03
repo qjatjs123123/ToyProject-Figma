@@ -10,25 +10,24 @@ import { SHAPE } from "../utils/constants/constants";
 import { HistoryManager } from "../utils/history/CommandManager";
 import { CreateHistory } from "../utils/history/CreateHistory";
 import { UpdateHistory } from "../utils/history/UpdateHistory";
+import { modeAtom } from "../Atoms/modeState";
 
 export default function useModeHandlers() {
   const {
     selectedIds,
     setSelectedIds,
-    setMode,
     tempShape,
     tempShapeDispatch,
-    mode,
     isCreating,
     setIsCreating,
     drawingShapeRef,
   } = useShapeRefState();
-
+  const [mode, setMode] = useAtom(modeAtom);
   const startPoint = useRef<any>({ x: 0, y: 0 });
   const [shapes, setShapes] = useAtom(shapeAtom);
   const selectedShapeAtom = useMemo(() => selectAtomByName(mode), [mode]);
   const [selectByNameArr] = useAtom(selectedShapeAtom);
-
+  console.log(mode);
   const isDragging = useRef(false);
 
   const shapeStrategy = ShapeStrategyFactory.createShape({
@@ -40,6 +39,7 @@ export default function useModeHandlers() {
   });
 
   const handleStageClick = (e: KonvaEventObject<MouseEvent>) => {
+    setMode(SHAPE.Select)
     if (isDragging.current) {
       return;
     }
@@ -110,8 +110,8 @@ export default function useModeHandlers() {
   const handleMouseUp = () => {
     if (!isCreating) return;
     if (tempShape && (tempShape.height < 5 || tempShape.width < 5)) return;
-    console.log(drawingShapeRef)
-    // if (mode !== SHAPE.Select)
+
+    if (mode !== SHAPE.Select)
       HistoryManager.log(new CreateHistory({ tempShape, shapes, setShapes, drawingShapeRef, setSelectedIds }));
 
     shapeStrategy.up();

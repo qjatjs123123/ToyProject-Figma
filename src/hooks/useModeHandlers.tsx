@@ -20,6 +20,8 @@ import { ShapeStrategyFactory } from "../utils/shapes/ShapeStrategyFactory";
 import { shapeAtom } from "../Atoms/ShapeState";
 import { selectAtomByName } from "../Atoms/selectAtomByName";
 import { SHAPE } from "../utils/constants/constants";
+import { HistoryManager } from "../utils/history/CommandManager";
+import { CreateHistory } from "../utils/history/CreateHistory";
 
 const mappingTable = {
   RECT: "Rectangle",
@@ -93,12 +95,11 @@ export default function useModeHandlers() {
 
     setIsCreating(true);
     startPoint.current = pos;
-
     shapeStrategy.down({
       selectByNameArr,
       startPoint: startPoint.current,
       currentPoint: pos,
-      setSelectedIds
+      setSelectedIds,
     });
   };
 
@@ -115,7 +116,7 @@ export default function useModeHandlers() {
     shapeStrategy.move({
       startPoint: startPoint.current,
       currentPoint: pos,
-      setSelectedIds
+      setSelectedIds,
     });
   };
 
@@ -141,27 +142,19 @@ export default function useModeHandlers() {
     }, 0);
   };
 
-
   const handleMouseUp = (e: KonvaEventObject<MouseEvent>) => {
-    startPoint.current = null;
-    if (!isCreating) {
-      return;
-    }
-    if (
-      tempShape &&
-      "width" in tempShape &&
-      (tempShape.height < 5 || tempShape.width < 5)
-    )
-      return;
-    setIsCreating(false);
+    if (!isCreating) return;
+    if (tempShape && (tempShape.height < 5 || tempShape.width < 5)) return;
 
+    if (mode !== SHAPE.Select)
+      HistoryManager.log(new CreateHistory({ tempShape, shapes, setShapes }));
+    
     shapeStrategy.up();
 
+    startPoint.current = null;
+    setIsCreating(false);
     setMode(SHAPE.Select);
-    tempShapeDispatch({
-      type: "INIT",
-      data: null as any,
-    });
+    tempShapeDispatch(null);
     selectShapesByDrageInit(e);
   };
 
@@ -185,6 +178,8 @@ export default function useModeHandlers() {
     if (!className || !(className in setterFunc)) return;
 
     const newPos = { x: e.target.x(), y: e.target.y() };
+
+    shapeStrategy.dragEnd(id, newPos);
 
     const command = new DragMoveCommand(setterFunc[className], id, newPos);
     CommandManager.execute(command);

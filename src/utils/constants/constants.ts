@@ -24,3 +24,5 @@ export const SHAPE_INIT_DATA = {
     stroke: "#80D0FF",
   }
 } ;
+
+export const MAX_HISTORY = 40;

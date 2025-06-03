@@ -15,6 +15,8 @@ import Input from "./components/Input";
 import { CommandManager } from "./utils/CommandManager";
 import { UpdateCommand } from "./utils/UpdateCommand";
 import { SHAPE } from "./utils/constants/constants";
+import { shapeAtom } from "./Atoms/ShapeState";
+import { HistoryManager } from "./utils/history/CommandManager";
 type ShapeName = "Rectangle" | "Ellipse";
 
 const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
@@ -23,6 +25,7 @@ const shapeItemMap: Record<ShapeName, (color: string) => React.ReactElement> = {
 };
 
 const App = () => {
+  const [shapes, setShapes] = useAtom(shapeAtom)
   const [rectangles, setRectangles] = useAtom(rectangleAtom);
   const [ellipses, setEllipses] = useAtom(EllipseAtom);
   const [showPicker, setShowPicker] = useState(false);
@@ -46,7 +49,7 @@ const App = () => {
     handleDragEnd,
     handleTransformEnd,
   } = useModeHandlers();
-  console.log(mode, SHAPE.Select,tempShape);
+
   const handleChangeColor = (selectedColor, shape) => {
     CommandManager.init();
     CommandManager.isBatching = true;
@@ -79,11 +82,11 @@ const App = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
-        CommandManager.undo();
+        HistoryManager.undo();
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "y") {
         e.preventDefault();
-        CommandManager.redo();
+        HistoryManager.redo();
       }
     };
 
@@ -346,7 +349,7 @@ const App = () => {
         onClick={handleStageClick}
       >
         <Layer>
-          {rectangles.map((rect) => (
+          {shapes.map((rect) => (
             <Rect
               {...rect}
               key={`${rect.name} ${rect.id}`}
@@ -367,6 +370,7 @@ const App = () => {
               draggable={true}
             />
           ))}
+ 
 
           {tempShape && mode === SHAPE.Rectangle && (
             <Rect {...tempShape} ref={drawingShapeRef} draggable={true} />

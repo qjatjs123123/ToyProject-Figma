@@ -1,2 +1,2 @@
-# neurocle_prj
-neurocle 과제 입니다.
+# 웹 기반 디자인 툴
+피그마 클론 코딩 프로젝트

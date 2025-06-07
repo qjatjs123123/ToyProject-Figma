@@ -1,13 +1,6 @@
-import React from "react";
-
 const SelectIcon = () => {
   return (
-    <svg
-      width="24"
-      height="24"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
       <mask
         id="select-icon-mask"
         width="17"

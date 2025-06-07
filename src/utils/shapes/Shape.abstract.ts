@@ -1,5 +1,3 @@
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface Point {
   x: number;
@@ -36,7 +34,6 @@ export abstract class Shape<T> {
   protected tempShape;
   protected shapes;
   protected setShapes;
-  private prevState: any;
 
   constructor({ setShapes, shapes, setTempShape, tempShape }: ShapeProps<T>) {
     this.setShapes = setShapes;
@@ -98,7 +95,7 @@ export abstract class Shape<T> {
 
         const updatedShape = {
           ...newShapes[index],
-          ...updateProps
+          ...updateProps,
         };
 
         newShapes[index] = updatedShape;

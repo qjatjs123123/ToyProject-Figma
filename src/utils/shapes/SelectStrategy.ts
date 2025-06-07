@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Mode, Select } from "../../type/Shape";
+import type { Select } from "../../type/Shape";
 import {
   Shape,
   type DownParams,
@@ -13,7 +13,6 @@ import Konva from "konva";
 import { ShapeStrategyFactory } from "./ShapeStrategyFactory";
 
 export class SelectStrategy extends Shape<Select> {
-
   update(shapeId: string, updateProps: any): resultParams {
     const shapeStrategy = ShapeStrategyFactory.createShape({
       mode: shapeId.split(" ")[0]! as any,
@@ -26,8 +25,7 @@ export class SelectStrategy extends Shape<Select> {
     return shapeStrategy.update(shapeId, updateProps);
   }
 
-  transformEnd(shapeId: string, data: any) : resultParams {
-
+  transformEnd(shapeId: string, data: any): resultParams {
     const shapeStrategy = ShapeStrategyFactory.createShape({
       mode: data.name(),
       setTempShape: this.setTempShape,
@@ -53,7 +51,7 @@ export class SelectStrategy extends Shape<Select> {
       y2: currentPoint.y,
       fill: SHAPE_INIT_DATA.select.fill,
       stroke: SHAPE_INIT_DATA.select.stroke,
-      type: SHAPE.Select
+      type: SHAPE.Select,
     } as Select;
 
     this.setTempShape(selectData);

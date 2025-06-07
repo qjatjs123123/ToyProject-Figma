@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SketchPicker, type ColorResult } from "react-color";
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "./Button";
 
 interface ColorPickerButtonProps {
@@ -9,7 +9,11 @@ interface ColorPickerButtonProps {
   color: string | undefined;
 }
 
-export const ColorPickerButton = ({shape, handleChangeColor, color}: ColorPickerButtonProps) => {
+export const ColorPickerButton = ({
+  shape,
+  handleChangeColor,
+  color,
+}: ColorPickerButtonProps) => {
   const [showPicker, setShowPicker] = useState(false);
 
   return (
@@ -31,7 +35,9 @@ export const ColorPickerButton = ({shape, handleChangeColor, color}: ColorPicker
             >
               <SketchPicker
                 color={shape?.fill}
-                onChangeComplete={(color: ColorResult ) => {handleChangeColor(color)}}
+                onChangeComplete={(color: ColorResult) => {
+                  handleChangeColor(color);
+                }}
               />
             </div>
           )}

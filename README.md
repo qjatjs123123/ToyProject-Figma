@@ -2,8 +2,6 @@
 
 피그마 클론 코딩 프로젝트 
 
-< br />
-
 https://figma-clone-prj.netlify.app/
 
 ## 🚀 프로젝트 개요
